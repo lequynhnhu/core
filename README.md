@@ -1,0 +1,4 @@
+core
+====
+
+OSGi application server
