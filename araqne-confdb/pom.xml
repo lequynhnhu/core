@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.araqne</groupId>
+		<artifactId>araqne-core-pom</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	<artifactId>araqne-confdb</artifactId>
+	<version>0.11.1</version>
+	<packaging>bundle</packaging>
+	<name>Araqne Config Database</name>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>org.araqne.confdb</Bundle-SymbolicName>
+						<Export-Package>
+							org.araqne.confdb;version=${project.version},
+							org.araqne.confdb.file;version=${project.version}</Export-Package>
+						<Import-Package>*</Import-Package>
+						<Main-Class>org.araqne.confdb.file.Console</Main-Class>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.araqne</groupId>
+			<artifactId>araqne-codec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.araqne</groupId>
+			<artifactId>araqne-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.araqne</groupId>
+			<artifactId>araqne-json</artifactId>
+		</dependency>
+	</dependencies>
+</project>
