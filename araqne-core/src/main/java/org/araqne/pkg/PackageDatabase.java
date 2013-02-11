@@ -50,8 +50,8 @@ public class PackageDatabase {
 	private void insertDefaultRepositories() {
 		PackageRepository[] DEFAULT_REPOSITORIES = null;
 		try {
-			DEFAULT_REPOSITORIES = new PackageRepository[] { PackageRepository.create("araqneapps", new URL(
-					"http://download.araqneapps.org/araqne/")) };
+			DEFAULT_REPOSITORIES = new PackageRepository[] { PackageRepository.create("araqne", new URL(
+					"http://download.araqne.org/araqne/")) };
 		} catch (MalformedURLException e) {
 		}
 

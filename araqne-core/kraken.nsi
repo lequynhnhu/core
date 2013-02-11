@@ -263,7 +263,7 @@ Function WriteRegistry
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Araqne" "DisplayName" "Araqne"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Araqne" "Publisher" "NCHOVY Inc."
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Araqne" "UninstallString" "$\"$INSTDIR\uninstaller.exe$\""
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Araqne" "URLInfoAbout" "http://araqneapps.org"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Araqne" "URLInfoAbout" "http://araqne.org"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Araqne" "DisplayVersion" "1.7.0"
 FunctionEnd
 

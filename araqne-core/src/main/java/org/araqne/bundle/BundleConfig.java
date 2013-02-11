@@ -123,7 +123,7 @@ public class BundleConfig {
 
 	private void addDefaultBundleRepositories() {
 		try {
-			addRepository(new BundleRepository("araqneapps", new URL("http://download.araqneapps.org/"), 1));
+			addRepository(new BundleRepository("araqne", new URL("http://download.araqne.org/"), 1));
 			addRepository(new BundleRepository("maven", new URL("http://repo1.maven.org/maven2/"), 0));
 		} catch (MalformedURLException e) {
 		} catch (IllegalStateException e) {

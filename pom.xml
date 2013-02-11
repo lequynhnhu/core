@@ -19,6 +19,14 @@
 		</repository>
 	</repositories>
 
+	<distributionManagement>
+		<repository>
+			<id>araqne</id>
+			<name>Araqne</name>
+			<url>scp://staging.araqne.org:2222/home/service/araqne/</url>
+		</repository>
+	</distributionManagement>
+
 	<licenses>
 		<license>
 			<name>Apache Software License 2</name>
