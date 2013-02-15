@@ -56,9 +56,9 @@ public class DefaultAuthService implements AuthService {
 
 		// add providers and start tracker
 		try {
-			ServiceReference[] refs = bc.getAllServiceReferences(AuthProvider.class.getName(), null);
+			ServiceReference<?>[] refs = bc.getAllServiceReferences(AuthProvider.class.getName(), null);
 			if (refs != null) {
-				for (ServiceReference ref : refs) {
+				for (ServiceReference<?> ref : refs) {
 					AuthProvider p = (AuthProvider) bc.getService(ref);
 					providers.put(p.getName(), p);
 				}
@@ -194,21 +194,21 @@ public class DefaultAuthService implements AuthService {
 		}
 	}
 
-	private class AuthProviderTracker extends ServiceTracker {
+	private class AuthProviderTracker extends ServiceTracker<AuthProvider, Object> {
 
 		public AuthProviderTracker() {
 			super(bc, AuthProvider.class.getName(), null);
 		}
 
 		@Override
-		public Object addingService(ServiceReference reference) {
+		public Object addingService(ServiceReference<AuthProvider> reference) {
 			AuthProvider p = (AuthProvider) bc.getService(reference);
 			providers.put(p.getName(), p);
 			return p;
 		}
 
 		@Override
-		public void removedService(ServiceReference reference, Object service) {
+		public void removedService(ServiceReference<AuthProvider> reference, Object service) {
 			AuthProvider p = (AuthProvider) service;
 			providers.remove(p);
 		}

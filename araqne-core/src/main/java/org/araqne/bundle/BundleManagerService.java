@@ -71,7 +71,7 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	}
 
 	private ConfigService getConfigService() {
-		ServiceReference ref = context.getServiceReference(ConfigService.class.getName());
+		ServiceReference<?> ref = context.getServiceReference(ConfigService.class.getName());
 		return (ConfigService) context.getService(ref);
 	}
 
@@ -82,7 +82,7 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	 */
 	@Override
 	public void refresh() {
-		ServiceReference ref = context.getServiceReference(PackageAdmin.class.getName());
+		ServiceReference<?> ref = context.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin packageAdmin = (PackageAdmin) context.getService(ref);
 		packageAdmin.refreshPackages(null);
 	}
@@ -479,7 +479,6 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 		return bundle.getLocation();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getEntryPaths(long bundleId, String directory) {
 		Bundle bundle = context.getBundle(bundleId);
@@ -526,7 +525,7 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	}
 
 	private KeyStoreManager getKeyStoreManager() {
-		ServiceReference ref = context.getServiceReference(KeyStoreManager.class.getName());
+		ServiceReference<?> ref = context.getServiceReference(KeyStoreManager.class.getName());
 		KeyStoreManager keyman = (KeyStoreManager) context.getService(ref);
 		return keyman;
 	}

@@ -50,7 +50,7 @@ public class OsgiScript implements Script {
 	public void properties(String[] args) {
 		try {
 			long id = Long.parseLong(args[0]);
-			ServiceReference[] refs = bundleContext.getServiceReferences(null, "(service.id=" + id + ")");
+			ServiceReference<?>[] refs = bundleContext.getServiceReferences((String) null, "(service.id=" + id + ")");
 			if (refs == null || refs.length == 0) {
 				context.println("service " + id + " not found");
 				return;
@@ -58,7 +58,7 @@ public class OsgiScript implements Script {
 
 			context.println("====== OSGi Service Properties ======");
 
-			ServiceReference ref = refs[0];
+			ServiceReference<?> ref = refs[0];
 			for (String key : ref.getPropertyKeys()) {
 				context.printf("%s: %s\n", key, ref.getProperty(key));
 			}
@@ -73,7 +73,7 @@ public class OsgiScript implements Script {
 		context.println("========= OSGi Services =========");
 		List<ServiceInfo> list = new ArrayList<ServiceInfo>();
 		try {
-			ServiceReference[] refs = bundleContext.getServiceReferences(null, null);
+			ServiceReference<?>[] refs = bundleContext.getServiceReferences((String)null, null);
 			for (int i = 0; i < refs.length; i++) {
 				Object o = bundleContext.getService(refs[i]);
 				long id = (Long) refs[i].getProperty("service.id");

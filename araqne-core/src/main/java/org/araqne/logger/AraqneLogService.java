@@ -51,13 +51,13 @@ public class AraqneLogService implements LogService, LoggerControlService {
 	}
 
 	@Override
-	public void log(ServiceReference sr, int level, String message, Throwable exception) {
+	public void log(@SuppressWarnings("rawtypes") ServiceReference sr, int level, String message, Throwable exception) {
 		Logger logger = (Logger) LoggerFactory.getLogger(AraqneLogService.class.getName());
 		logger.log(level, message, exception);
 	}
 
 	@Override
-	public void log(ServiceReference sr, int level, String message) {
+	public void log(@SuppressWarnings("rawtypes") ServiceReference sr, int level, String message) {
 		Logger logger = (Logger) LoggerFactory.getLogger(AraqneLogService.class.getName());
 		logger.log(level, message);
 	}

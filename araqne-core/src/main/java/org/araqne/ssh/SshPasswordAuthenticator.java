@@ -26,7 +26,7 @@ public class SshPasswordAuthenticator implements PasswordAuthenticator {
 	@Override
 	public boolean authenticate(String username, String password, ServerSession session) {
 		BundleContext bc = Araqne.getContext();
-		ServiceReference ref = bc.getServiceReference(AccountManager.class.getName());
+		ServiceReference<?> ref = bc.getServiceReference(AccountManager.class.getName());
 		AccountManager manager = (AccountManager) bc.getService(ref);
 		return manager.verifyPassword(username, password);
 	}

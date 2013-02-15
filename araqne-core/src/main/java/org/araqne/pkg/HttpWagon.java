@@ -176,7 +176,7 @@ public class HttpWagon {
 	}
 
 	private static int getSocketTimeout() {
-		ServiceReference ref = Araqne.getContext().getServiceReference(ConfigService.class.getName());
+		ServiceReference<?> ref = Araqne.getContext().getServiceReference(ConfigService.class.getName());
 		if (ref != null) {
 			ConfigService conf = (ConfigService) Araqne.getContext().getService(ref);
 			ConfigDatabase db = conf.ensureDatabase("araqne-core");
@@ -190,7 +190,7 @@ public class HttpWagon {
 	}
 
 	private static int getConnectTimeout() {
-		ServiceReference ref = Araqne.getContext().getServiceReference(ConfigService.class.getName());
+		ServiceReference<?> ref = Araqne.getContext().getServiceReference(ConfigService.class.getName());
 		if (ref != null) {
 			ConfigService conf = (ConfigService) Araqne.getContext().getService(ref);
 			ConfigDatabase db = conf.ensureDatabase("araqne-core");

@@ -38,7 +38,7 @@ public class BatchScriptManager {
 
 	public BatchScriptManager() {
 		BundleContext bc = Araqne.getContext();
-		ServiceReference ref = bc.getServiceReference(ConfigService.class.getName());
+		ServiceReference<?> ref = bc.getServiceReference(ConfigService.class.getName());
 		this.conf = (ConfigService) bc.getService(ref);
 	}
 

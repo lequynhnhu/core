@@ -72,7 +72,7 @@ public class ScriptContextImpl implements ScriptContext {
 
 	@Override
 	public AccountManager getAccountManager() {
-		ServiceReference ref = bc.getServiceReference(AccountManager.class.getName());
+		ServiceReference<?> ref = bc.getServiceReference(AccountManager.class.getName());
 		AccountManager accountManager = (AccountManager) bc.getService(ref);
 		return accountManager;
 	}

@@ -15,7 +15,7 @@
  */
 package org.araqne.account;
 
-import java.util.Properties;
+import java.util.Hashtable;
 
 import org.araqne.api.AccountManager;
 import org.araqne.api.Script;
@@ -29,8 +29,8 @@ public class AccountScriptFactory implements ScriptFactory {
 
 	public AccountScriptFactory(BundleContext bc, ConfigService conf) {
 		manager = new AccountManagerImpl(conf);
-		bc.registerService(AuthProvider.class.getName(), manager, new Properties());
-		bc.registerService(AccountManager.class.getName(), manager, new Properties());
+		bc.registerService(AuthProvider.class.getName(), manager, new Hashtable<String, Object>());
+		bc.registerService(AccountManager.class.getName(), manager, new Hashtable<String, Object>());
 	}
 
 	@Override

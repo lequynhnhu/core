@@ -51,7 +51,7 @@ public class ScriptRunner implements Runnable {
 		this.context = context;
 		this.args = getArguments(tokens);
 
-		ServiceReference[] refs = null;
+		ServiceReference<?>[] refs = null;
 		try {
 			refs = Araqne.getContext().getServiceReferences(ScriptFactory.class.getName(), "(alias=" + alias + ")");
 		} catch (InvalidSyntaxException e) {

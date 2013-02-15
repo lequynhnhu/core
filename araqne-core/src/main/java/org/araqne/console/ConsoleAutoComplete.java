@@ -129,7 +129,7 @@ public class ConsoleAutoComplete {
 	}
 
 	private Script newScript(String alias) {
-		ServiceReference[] refs;
+		ServiceReference<?>[] refs;
 		try {
 			refs = bundleContext.getServiceReferences(ScriptFactory.class.getName(), "(alias=" + alias + ")");
 			if (refs == null || refs.length == 0) {
@@ -146,7 +146,7 @@ public class ConsoleAutoComplete {
 
 	private void addScriptAliases(String prefix, List<ScriptAutoCompletion> terms) {
 		try {
-			ServiceReference[] refs = bundleContext.getServiceReferences(ScriptFactory.class.getName(), null);
+			ServiceReference<?>[] refs = bundleContext.getServiceReferences(ScriptFactory.class.getName(), null);
 			if (refs == null)
 				return;
 

@@ -15,7 +15,8 @@
  */
 package org.araqne.keystore;
 
-import java.util.Properties;
+
+import java.util.Hashtable;
 
 import org.araqne.api.KeyStoreManager;
 import org.araqne.api.Script;
@@ -33,7 +34,7 @@ public class KeyStoreScriptFactory implements ScriptFactory {
 	public KeyStoreScriptFactory() {
 		this.manager = new KeyStoreManagerImpl(getConfigService(), getPreferences());
 		BundleContext bc = Araqne.getContext();
-		bc.registerService(KeyStoreManager.class.getName(), manager, new Properties());
+		bc.registerService(KeyStoreManager.class.getName(), manager, new Hashtable<String, Object>());
 	}
 
 	@Override
@@ -43,13 +44,13 @@ public class KeyStoreScriptFactory implements ScriptFactory {
 
 	private ConfigService getConfigService() {
 		BundleContext bc = Araqne.getContext();
-		ServiceReference ref = bc.getServiceReference(ConfigService.class.getName());
+		ServiceReference<?> ref = bc.getServiceReference(ConfigService.class.getName());
 		return (ConfigService) bc.getService(ref);
 	}
 
 	private Preferences getPreferences() {
 		BundleContext bc = Araqne.getContext();
-		ServiceReference ref = bc.getServiceReference(PreferencesService.class.getName());
+		ServiceReference<?> ref = bc.getServiceReference(PreferencesService.class.getName());
 		PreferencesService prefsService = (PreferencesService) bc.getService(ref);
 		return prefsService.getSystemPreferences();
 	}

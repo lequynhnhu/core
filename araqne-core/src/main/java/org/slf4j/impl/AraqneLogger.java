@@ -467,7 +467,8 @@ public class AraqneLogger extends org.apache.felix.framework.Logger implements o
 	 * for felix logger.
 	 */
 	@Override
-	protected void doLog(Bundle bundle, ServiceReference sr, int level, String msg, Throwable throwable) {
+	protected void doLog(Bundle bundle, @SuppressWarnings("rawtypes") ServiceReference sr, int level, String msg,
+			Throwable throwable) {
 		internalLog(level, msg, throwable);
 	}
 }

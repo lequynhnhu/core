@@ -76,7 +76,7 @@ public class PackageManagerService implements PackageManager {
 
 	public PackageManagerService(BundleContext bc) {
 		this.bc = bc;
-		ServiceReference ref = bc.getServiceReference(BundleManager.class.getName());
+		ServiceReference<?> ref = bc.getServiceReference(BundleManager.class.getName());
 		bundleManager = (BundleManager) bc.getService(ref);
 		db = new PackageDatabase(getConfigService());
 	}
@@ -602,7 +602,7 @@ public class PackageManagerService implements PackageManager {
 				return new byte[0];
 			}
 		} else if (repo.isHttps()) {
-			ServiceReference ref = bc.getServiceReference(KeyStoreManager.class.getName());
+			ServiceReference<?> ref = bc.getServiceReference(KeyStoreManager.class.getName());
 			KeyStoreManager keyman = (KeyStoreManager) bc.getService(ref);
 			try {
 				TrustManagerFactory tmf = keyman.getTrustManagerFactory(repo.getTrustStoreAlias(), "SunX509");
@@ -633,7 +633,7 @@ public class PackageManagerService implements PackageManager {
 				return new String();
 			}
 		} else if (repo.isHttps()) {
-			ServiceReference ref = bc.getServiceReference(KeyStoreManager.class.getName());
+			ServiceReference<?> ref = bc.getServiceReference(KeyStoreManager.class.getName());
 			KeyStoreManager keyman = (KeyStoreManager) bc.getService(ref);
 			try {
 				TrustManagerFactory tmf = keyman.getTrustManagerFactory(repo.getTrustStoreAlias(), "SunX509");
@@ -706,12 +706,12 @@ public class PackageManagerService implements PackageManager {
 	}
 
 	private ConfigService getConfigService() {
-		ServiceReference ref = bc.getServiceReference(ConfigService.class.getName());
+		ServiceReference<?> ref = bc.getServiceReference(ConfigService.class.getName());
 		return (ConfigService) bc.getService(ref);
 	}
 
 	private KeyStoreManager getKeyStoreManager() {
-		ServiceReference ref = bc.getServiceReference(KeyStoreManager.class.getName());
+		ServiceReference<?> ref = bc.getServiceReference(KeyStoreManager.class.getName());
 		KeyStoreManager keyman = (KeyStoreManager) bc.getService(ref);
 		return keyman;
 	}

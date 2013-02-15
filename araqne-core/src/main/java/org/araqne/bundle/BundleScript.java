@@ -554,7 +554,7 @@ public class BundleScript implements Script {
 			@ScriptArgument(name = "artifact id", description = "bundle artifact id") })
 	public void versions(String[] args) {
 		BundleContext bc = Araqne.getContext();
-		ServiceReference ref = bc.getServiceReference(KeyStoreManager.class.getName());
+		ServiceReference<?> ref = bc.getServiceReference(KeyStoreManager.class.getName());
 		KeyStoreManager keyman = (KeyStoreManager) bc.getService(ref);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss 'UTC'");
 
