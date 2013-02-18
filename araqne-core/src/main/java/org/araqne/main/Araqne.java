@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,6 @@ import java.util.jar.Manifest;
 
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.util.FelixConstants;
-import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.prefs.impl.PreferencesManager;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.DailyRollingFileAppender;
@@ -212,7 +212,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 		List activators = new ArrayList();
 		activators.add(this);
 
-		Map configMap = new StringMap(false);
+		Map configMap = new HashMap<String, String>();
 		Logger logger = LoggerFactory.getLogger(Felix.class.getName());
 		configMap.put(FelixConstants.LOG_LOGGER_PROP, logger);
 		configMap.put(FelixConstants.LOG_LEVEL_PROP, "3"); // INFO

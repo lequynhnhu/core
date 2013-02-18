@@ -137,8 +137,7 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.araqne.bundle.BundleManager#addSecureRemoteRepository(java.lang
+	 * @see org.araqne.bundle.BundleManager#addSecureRemoteRepository(java.lang
 	 * .String, java.net.URL, java.lang.String, java.lang.String)
 	 */
 	@Override
@@ -152,8 +151,7 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.araqne.bundle.BundleManager#removeRemoteRepository(java.lang.
+	 * @see org.araqne.bundle.BundleManager#removeRemoteRepository(java.lang.
 	 * String)
 	 */
 	@Override
@@ -179,15 +177,13 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.araqne.bundle.BundleManager#installBundle(org.araqne.pkg.
+	 * @see org.araqne.bundle.BundleManager#installBundle(org.araqne.pkg.
 	 * ProgressMonitor, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
 	public long installBundle(ProgressMonitor monitor, String groupId, String artifactId, String version)
 			throws MavenResolveException {
-		MavenResolver resolver = new MavenResolver(getLocalRepository(), config.getRepositories(), monitor,
-				getKeyStoreManager());
+		MavenResolver resolver = new MavenResolver(getLocalRepository(), config.getRepositories(), monitor, getKeyStoreManager());
 		Version v = (version != null) ? new Version(version) : null;
 		MavenArtifact artifact = new MavenArtifact(groupId, artifactId, v);
 
@@ -346,8 +342,8 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 						File temp = File.createTempFile(before.getName(), "", before.getParentFile());
 						temp.delete();
 						if (before.renameTo(temp)) {
-							MavenResolver resolver = new MavenResolver(getLocalRepository(), config.getRepositories(),
-									null, getKeyStoreManager());
+							MavenResolver resolver = new MavenResolver(getLocalRepository(), config.getRepositories(), null,
+									getKeyStoreManager());
 							MavenArtifact artifact = getArtifact(bundle);
 							File after = resolver.resolve(artifact);
 							if (after.exists())
