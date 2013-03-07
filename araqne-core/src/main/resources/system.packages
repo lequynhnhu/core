@@ -162,5 +162,5 @@ sun.misc,
 sun.reflect,
 com.jcraft.jsch; version=0.1.48,
 com.jcraft.jsch.jce; version=0.1.48,
-com.jcraft.jsch.jcraft; version=0.1.48
+com.jcraft.jsch.jcraft; version=0.1.48,
 org.json;version=1.1.1
