@@ -24,16 +24,20 @@ public class EncodedStringCache {
 	private byte[] value;
 	private int rawNumberLength;
 
-	public synchronized static EncodedStringCache getEncodedString(String value) {
-		EncodedStringCache es = cache.get(value);
-
-		if (es == null) {
-			es = new EncodedStringCache(value);
-			cache.put(new String(value), es);
-		}
-
-		return es;
+	public static EncodedStringCache getEncodedString(String value) {
+		return new EncodedStringCache(value);
 	}
+
+//	public synchronized static EncodedStringCache getEncodedString(String value) {
+//		EncodedStringCache es = cache.get(value);
+//
+//		if (es == null) {
+//			es = new EncodedStringCache(value);
+//			cache.put(new String(value), es);
+//		}
+//
+//		return es;
+//	}
 
 	private EncodedStringCache(String value) {
 		try {
