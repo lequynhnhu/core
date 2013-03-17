@@ -152,7 +152,8 @@ public class ScriptContextImpl implements ScriptContext {
 
 	@Override
 	public void print(Object value) {
-		print(value.toString());
+		if (value != null)
+			print(value.toString());
 	}
 
 	@Override
@@ -162,16 +163,13 @@ public class ScriptContextImpl implements ScriptContext {
 
 	@Override
 	public void println(String value) {
-		if (value == null)
-			return;
-
 		print(value);
 		print("\r\n");
 	}
 
 	@Override
 	public void println(Object value) {
-		println(value.toString());
+		println(value == null ? null : value.toString());
 	}
 
 	@Override
