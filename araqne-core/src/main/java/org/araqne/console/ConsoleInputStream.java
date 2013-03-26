@@ -51,10 +51,6 @@ public class ConsoleInputStream implements ScriptInputStream {
 
 	@Override
 	public void supplyFunctionKey(FunctionKeyEvent keyEvent) {
-		KeyCode c = keyEvent.getKeyCode();
-		if (c == KeyCode.CTRL_C || c == KeyCode.CTRL_D)
-			buffer.offer((char) 27);
-
 		for (FunctionKeyEventListener callback : callbacks)
 			callback.keyPressed(keyEvent);
 	}
