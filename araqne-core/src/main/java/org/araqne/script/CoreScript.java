@@ -296,7 +296,7 @@ public class CoreScript implements Script {
 			context.getSession().setProperty("dir", newDir);
 	}
 
-	private File canonicalize(File dir, String path) throws IOException {
+	public static File canonicalize(File dir, String path) throws IOException {
 		if (File.separator.equals("\\") && 
 				(path.startsWith("\\") || (path.length() >= 3 && path.startsWith(":\\", 1))))
 			return new File(path).getCanonicalFile();

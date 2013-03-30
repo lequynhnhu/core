@@ -30,6 +30,7 @@ import org.araqne.api.Script;
 import org.araqne.api.ScriptArgument;
 import org.araqne.api.ScriptContext;
 import org.araqne.api.ScriptUsage;
+import org.araqne.script.CoreScript;
 
 public class BatchScript implements Script {
 	private ScriptContext context;
@@ -122,6 +123,13 @@ public class BatchScript implements Script {
 			context.printf("batch failed: %s\n", e.toString());
 		}
 	}
+	
+	@ScriptUsage(description = "", arguments = {
+			@ScriptArgument(name = "file path", type = "string", description = "script file path", autocompletion = PathAutoCompleter.class),
+			@ScriptArgument(name = "stop on fail", type = "boolean", description = "true if you want to stop script on fail", optional = true) })
+	public void file(String[] args) {
+		executeFile(args);
+	}
 
 	@ScriptUsage(description = "", arguments = {
 			@ScriptArgument(name = "file path", type = "string", description = "script file path", autocompletion = PathAutoCompleter.class),
@@ -129,7 +137,7 @@ public class BatchScript implements Script {
 	public void executeFile(String[] args) {
 		try {
 			boolean stopOnFail = true;
-			String[] scriptArgs = null;
+			String[] scriptArgs = new String[0];
 			
 			if (args.length > 1) {
 				for (int idx = 1; idx < args.length - 1; ++idx) {
@@ -147,7 +155,7 @@ public class BatchScript implements Script {
 
 			File dir = (File) context.getSession().getProperty("dir");
 			if (dir != null) 
-				manager.executeFile(context, new File(dir, args[0]), stopOnFail, scriptArgs);
+				manager.executeFile(context, CoreScript.canonicalize(dir, args[0]), stopOnFail, scriptArgs);
 			else
 				manager.executeFile(context, new File(args[0]), stopOnFail, scriptArgs);
 		} catch (Exception e) {

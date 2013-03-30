@@ -125,8 +125,14 @@ public class BatchScriptManager {
 				if (followNextLine)
 					continue;
 				
-				if (cmd.trim().isEmpty())
+				if (cmd.trim().isEmpty()) {
+					cmd = null;
+					inlineRedirection = null;
+
 					continue;
+				}
+				
+				cmd = replacePlaceholders(cmd, scriptArgs);
 
 				Matcher matcher = ptrnInlineRedir.matcher(cmd);
 				if (matcher.find()) {
@@ -166,6 +172,29 @@ public class BatchScriptManager {
 					br.close();
 			} catch (IOException e) {
 			}
+		}
+	}
+
+	private static Pattern ptrnPlaceHolder = Pattern.compile("\\$\\{([0-9]+)\\}");
+	private String replacePlaceholders(String cmd, String[] scriptArgs) {
+		Matcher matcher = ptrnPlaceHolder.matcher(cmd);
+		StringBuilder sb = new StringBuilder();
+		int oldStart = 0;
+		while (matcher.find()) {
+			sb.append(cmd.substring(oldStart, matcher.start()));
+			sb.append(getArgs(Integer.parseInt(matcher.group(1)) - 1, scriptArgs));
+			oldStart = matcher.end();
+		}
+		sb.append(cmd.substring(oldStart));
+		
+		return sb.toString();
+	}
+
+	private Object getArgs(int idx, String[] scriptArgs) {
+		if (idx < scriptArgs.length) {
+			return scriptArgs[idx];
+		} else {
+			return "";
 		}
 	}
 }
