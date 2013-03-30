@@ -297,7 +297,10 @@ public class CoreScript implements Script {
 	}
 
 	private File canonicalize(File dir, String path) throws IOException {
-		if (path.startsWith("/"))
+		if (File.separator.equals("\\") && 
+				(path.startsWith("\\") || (path.length() >= 3 && path.startsWith(":\\", 1))))
+			return new File(path).getCanonicalFile();
+		else if (path.startsWith("/"))
 			return new File(path).getCanonicalFile();
 		else
 			return new File(dir, path).getCanonicalFile();
