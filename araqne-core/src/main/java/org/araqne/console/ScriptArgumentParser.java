@@ -19,11 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ScriptArgumentParser {
+
 	public static String[] tokenize(String line) {
 		StringBuilder sb = new StringBuilder();
 		List<String> args = new ArrayList<String>();
 
 		boolean quoteOpen = false;
+		boolean squoteOpen = false;
 		boolean escape = false;
 
 		int i = 0;
@@ -39,6 +41,8 @@ public class ScriptArgumentParser {
 				if (escape) {
 					escape = false;
 					sb.append(c);
+				} else if (squoteOpen) {
+					sb.append(c);
 				} else {
 					escape = true;
 				}
@@ -49,6 +53,8 @@ public class ScriptArgumentParser {
 				if (escape) {
 					escape = false;
 					sb.append(c);
+				} else if (squoteOpen) {
+					sb.append(c);
 				} else {
 					quoteOpen = !quoteOpen;
 					if (!quoteOpen) {
@@ -58,8 +64,23 @@ public class ScriptArgumentParser {
 				}
 				continue;
 			}
+			
+			if (c == '\'') {
+				if (escape) {
+					escape = false;
+					sb.append(c);
+				} else {
+					quoteOpen = !quoteOpen;
+					squoteOpen = !squoteOpen;
+					if (!quoteOpen) {
+						args.add(sb.toString());
+						sb = new StringBuilder();
+					}
+				}
+				continue;
+			}
 
-			if (c == ' ' && !quoteOpen) {
+			if (c == ' ' && !(quoteOpen)) {
 				String parsed = sb.toString();
 				if (!parsed.trim().isEmpty())
 					args.add(parsed);
