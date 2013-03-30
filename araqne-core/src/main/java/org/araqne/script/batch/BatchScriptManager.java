@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.araqne.api.ScriptContext;
 import org.araqne.confdb.Config;
@@ -83,25 +85,71 @@ public class BatchScriptManager {
 		File scriptFile = getPath(alias);
 		if (scriptFile == null)
 			throw new IOException("script not found");
-		executeFile(context, scriptFile, stopOnFail);
+		executeFile(context, scriptFile, stopOnFail, new String[0]);
 	}
 
-	public void executeFile(ScriptContext context, File file) throws IOException {
-		executeFile(context, file, true);
+	public void executeFile(ScriptContext context, File file, String[] scriptArgs) throws IOException {
+		executeFile(context, file, true, scriptArgs);
 	}
+	
+	private static Pattern ptrnInlineRedir = Pattern.compile("<<([a-zA-Z0-9]+)\\s*$"); 
 
-	public void executeFile(ScriptContext context, File file, boolean stopOnFail) throws IOException {
+	public void executeFile(ScriptContext context, File file, boolean stopOnFail, String[] scriptArgs) throws IOException {
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+			String cmd = null;
 			while (true) {
 				String line = br.readLine();
+				String inlineRedirection = null;
+				
 				if (line == null)
 					break;
+				
+				line = line.trim();
+				
+				if (line.startsWith("#"))
+					continue;
+				
+				boolean followNextLine = line.endsWith("\\");
+				
+				if (followNextLine) {
+					line = line.substring(0, line.length() - 1).trim();
+				}
+				
+				if (cmd == null)
+					cmd = line;
+				else 
+					cmd += " " + line;
+				
+				if (followNextLine)
+					continue;
+				
+				if (cmd.trim().isEmpty())
+					continue;
+
+				Matcher matcher = ptrnInlineRedir.matcher(cmd);
+				if (matcher.find()) {
+					cmd = cmd.substring(0, matcher.start());
+					String endOfInputMark = matcher.group(1);
+					StringBuilder builder = new StringBuilder();
+					while(true) {
+						String l = br.readLine();
+						if (l == null)
+							throw new IllegalArgumentException("unexpected end of the file while reading inline redirection stream");
+						if (l.equals(endOfInputMark))
+							break;
+						builder.append(l);
+						builder.append("\n");
+					}
+					inlineRedirection = builder.toString();
+				}
 
 				try {
-					context.printf("executing \"%s\"\n", line);
-					ScriptRunner runner = new ScriptRunner(context, line);
+					context.printf("executing \"%s\"\n", cmd);
+					ScriptRunner runner = new ScriptRunner(context, cmd);
+					if (inlineRedirection != null)
+						runner.setInputString(inlineRedirection);
 					runner.setPrompt(false);
 					runner.run();
 				} catch (Exception e) {
@@ -109,6 +157,8 @@ public class BatchScriptManager {
 					if (stopOnFail)
 						break;
 				}
+				cmd = null;
+				inlineRedirection = null;
 			}
 		} finally {
 			try {

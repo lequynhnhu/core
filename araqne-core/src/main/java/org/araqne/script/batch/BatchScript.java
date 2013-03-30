@@ -21,6 +21,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.araqne.api.PathAutoCompleter;
 import org.araqne.api.Script;
@@ -126,10 +129,27 @@ public class BatchScript implements Script {
 	public void executeFile(String[] args) {
 		try {
 			boolean stopOnFail = true;
+			String[] scriptArgs = null;
+			
+			if (args.length > 1) {
+				for (int idx = 1; idx < args.length - 1; ++idx) {
+					if (args[idx].equals("--")) {
+						scriptArgs = Arrays.copyOfRange(args, idx + 1, args.length);
+						args = Arrays.copyOfRange(args, 0, idx);
+						break;
+					}
+				}
+				
+			}
+
 			if (args.length > 1)
 				stopOnFail = Boolean.parseBoolean(args[1]);
 
-			manager.executeFile(context, new File(args[0]), stopOnFail);
+			File dir = (File) context.getSession().getProperty("dir");
+			if (dir != null) 
+				manager.executeFile(context, new File(dir, args[0]), stopOnFail, scriptArgs);
+			else
+				manager.executeFile(context, new File(args[0]), stopOnFail, scriptArgs);
 		} catch (Exception e) {
 			context.printf("batch failed: %s\n", e.toString());
 		}

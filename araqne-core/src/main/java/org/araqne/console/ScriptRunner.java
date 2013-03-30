@@ -15,13 +15,21 @@
  */
 package org.araqne.console;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
+import org.araqne.api.FunctionKeyEvent;
+import org.araqne.api.FunctionKeyEventListener;
 import org.araqne.api.Script;
 import org.araqne.api.ScriptArgument;
 import org.araqne.api.ScriptContext;
 import org.araqne.api.ScriptFactory;
+import org.araqne.api.ScriptInputStream;
 import org.araqne.api.ScriptUsage;
 import org.araqne.main.Araqne;
 import org.osgi.framework.InvalidSyntaxException;
@@ -30,11 +38,70 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ScriptRunner implements Runnable {
+	public class StringScriptInputStream implements ScriptInputStream {
+
+		private final String backString;
+		private StringReader reader;
+		private Scanner scanner;
+
+		public StringScriptInputStream(String inputStreamString) {
+			backString = inputStreamString;
+			reader = new StringReader(backString);
+			scanner = new Scanner(reader);
+		}
+
+		@Override
+		public void supplyInput(char character) {
+		}
+
+		@Override
+		public void supplyFunctionKey(FunctionKeyEvent keyEvent) {
+			// maybe needed C-c handling?
+		}
+
+		@Override
+		public char read() throws InterruptedException {
+			try {
+				return (char) reader.read();
+			} catch (IOException e) {
+				return (char) -1;
+			}
+		}
+
+		@Override
+		public String readLine() throws InterruptedException {
+			return scanner.nextLine();
+		}
+
+		@Override
+		public void flush() {
+			try {
+				while(reader.read() != -1);
+			} catch (IOException e) {
+			}
+		}
+
+		@Override
+		public void flush(Collection<Character> drain) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void addFunctionKeyEventListener(FunctionKeyEventListener callback) {
+		}
+
+		@Override
+		public void removeFunctionKeyEventListener(FunctionKeyEventListener callback) {
+		}
+
+	}
+
 	private Logger logger = LoggerFactory.getLogger(ScriptRunner.class.getName());
 	private ScriptContext context;
 	private String methodName;
 	private String[] args;
 	private boolean isPromptEnabled = true;
+	private String inputStreamString;
 
 	public ScriptRunner(ScriptContext context, String line) {
 		String[] tokens = ScriptArgumentParser.tokenize(line.trim());
@@ -82,12 +149,22 @@ public class ScriptRunner implements Runnable {
 		}
 		return arguments;
 	}
+	
+	public void setInputString(String str) {
+		inputStreamString = str;
+	}
 
 	@Override
 	public void run() {
 		context.turnEchoOn();
 		context.getInputStream().flush();
 
+		ScriptInputStream oldInputStream = null;
+		if (inputStreamString != null) {
+			oldInputStream = context.getInputStream();
+			context.setInputStream(new StringScriptInputStream(inputStreamString));
+		}
+		
 		Script script = context.getCurrentScript();
 		script.setScriptContext(context);
 		invokeScript(script);
@@ -95,6 +172,8 @@ public class ScriptRunner implements Runnable {
 		if (isPromptEnabled)
 			context.printPrompt();
 
+		if (inputStreamString != null)
+			context.setInputStream(oldInputStream);
 		context.setCurrentScript(null);
 	}
 
@@ -163,5 +242,18 @@ public class ScriptRunner implements Runnable {
 				count++;
 		}
 		return count;
+	}
+	
+	public static void main(String[] args) {
+		String input = "Line1\nline2\nline3\n\nline5\n";
+		StringReader reader = new StringReader(input);
+		Scanner scanner = new Scanner(reader);
+		
+		try {
+			System.out.println(new String(new int[] { reader.read() }, 0, 1));
+			System.out.println(scanner.nextLine());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
