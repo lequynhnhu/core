@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.araqne.ansicode.AnsiEscapeCode;
 import org.araqne.ansicode.CursorPosCode;
 import org.araqne.ansicode.EraseLineCode;
 import org.araqne.ansicode.EraseLineCode.Option;
@@ -46,15 +47,18 @@ class ReadLineHandler implements FunctionKeyEventListener {
 
 				synchronized (this) {
 					if (c == '\r' || c == '\n') {
-						// insert at the front
-						if (history.size() > 1 && history.get(0).length() == 0)
-							history.removeFirst();
-						if (history.size() < 1 || !history.get(0).equals(screen)) {
-							history.addFirst(screen);
+						// do not push hidden (e.g. password) input to history
+						if (context.isEchoOn()) {
+							// insert at the front
+							if (history.size() > 1 && history.get(0).length() == 0)
+								history.removeFirst();
+							if (history.size() < 1 || !history.get(0).equals(screen)) {
+								history.addFirst(screen);
+							}
+							resetIndex();
+							out.println("");
 						}
-						resetIndex();
 
-						out.println("");
 						return screen;
 					}
 
@@ -77,7 +81,6 @@ class ReadLineHandler implements FunctionKeyEventListener {
 
 	private void sync() {
 		try {
-			ScriptOutputStream os = context.getOutputStream();
 			int boundary = 0;
 
 			for (; boundary < Math.min(screen.length(), input.length()); boundary++)
@@ -93,19 +96,19 @@ class ReadLineHandler implements FunctionKeyEventListener {
 			int oldCursorPos = getPhysicalPoint(screen, 0, screenCursor);
 			int newCursorPos = getPhysicalPoint(input, 0, inputCursor);
 
-			os.print(new CursorPosCode(CursorPosCode.Option.Save));
+			w(new CursorPosCode(CursorPosCode.Option.Save));
 
 			// clear different region
 			if (oldPos - diffPos != 0) {
 				moveCursor((oldPos - oldCursorPos) - (oldPos - diffPos));
-				os.print(new EraseLineCode(Option.CursorToEnd));
+				w(new EraseLineCode(Option.CursorToEnd));
 			}
 
 			// write new input
-			os.print(input.substring(boundary));
+			w(input.substring(boundary));
 
 			// move cursor to final position
-			os.print(new CursorPosCode(CursorPosCode.Option.Restore));
+			w(new CursorPosCode(CursorPosCode.Option.Restore));
 			moveCursor(newCursorPos - oldCursorPos);
 
 			// sync
@@ -116,13 +119,24 @@ class ReadLineHandler implements FunctionKeyEventListener {
 		}
 	}
 
+	private void w(AnsiEscapeCode c) {
+		ScriptOutputStream os = context.getOutputStream();
+		if (context.isEchoOn())
+			os.print(c);
+	}
+
+	private void w(String s) {
+		ScriptOutputStream os = context.getOutputStream();
+		if (context.isEchoOn())
+			os.print(s);
+	}
+
 	// relative move
 	private void moveCursor(int move) {
-		ScriptOutputStream os = context.getOutputStream();
 		if (move > 0)
-			os.print(new MoveCode(MoveCode.Direction.Right, move));
+			w(new MoveCode(MoveCode.Direction.Right, move));
 		else if (move < 0)
-			os.print(new MoveCode(MoveCode.Direction.Left, -move));
+			w(new MoveCode(MoveCode.Direction.Left, -move));
 	}
 
 	private int getPhysicalPoint(String s, int begin, int end) {
@@ -177,17 +191,41 @@ class ReadLineHandler implements FunctionKeyEventListener {
 			}
 		} else if (e.getKeyCode() == KeyCode.BACKSPACE) {
 			synchronized (this) {
-				if (screenCursor > 0) {
-					String left = input.substring(0, screenCursor - 1);
-					String right = input.substring(screenCursor);
+				if (inputCursor > 0) {
+					String left = input.substring(0, inputCursor - 1);
+					String right = input.substring(inputCursor);
 					input = left + right;
 					inputCursor--;
 					sync();
 				}
 			}
 		} else if (e.getKeyCode() == KeyCode.DELETE) {
+			synchronized (this) {
+				if (inputCursor < input.length()) {
+					String left = input.substring(0, inputCursor);
+					String right = input.substring(inputCursor + 1);
+					input = left + right;
+					sync();
+				}
+			}
 		} else if (e.getKeyCode() == KeyCode.CTRL_C || e.getKeyCode() == KeyCode.CTRL_D) {
 			buffer.offer((char) 27);
+		} else if (e.getKeyCode() == KeyCode.CTRL_U) {
+			synchronized (this) {
+				input = "";
+				inputCursor = 0;
+				sync();
+			}
+		} else if (e.getKeyCode() == KeyCode.CTRL_A) {
+			synchronized (this) {
+				inputCursor = 0;
+				sync();
+			}
+		} else if (e.getKeyCode() == KeyCode.CTRL_E) {
+			synchronized (this) {
+				inputCursor = input.length();
+				sync();
+			}
 		} else if (e.getKeyCode() == KeyCode.UP) {
 			synchronized (this) {
 				boolean hasBeenEditing = historyIndex == -1;
