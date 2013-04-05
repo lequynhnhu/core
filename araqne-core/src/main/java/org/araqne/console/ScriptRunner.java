@@ -76,7 +76,8 @@ public class ScriptRunner implements Runnable {
 		@Override
 		public void flush() {
 			try {
-				while(reader.read() != -1);
+				while (reader.read() != -1)
+					;
 			} catch (IOException e) {
 			}
 		}
@@ -135,6 +136,9 @@ public class ScriptRunner implements Runnable {
 
 		Script script = scriptFactory.createScript();
 		context.setCurrentScript(script);
+
+		// reset script command history
+		context.setInputStream(new ConsoleInputStream(context));
 		Araqne.getContext().ungetService(refs[0]);
 	}
 
@@ -149,7 +153,7 @@ public class ScriptRunner implements Runnable {
 		}
 		return arguments;
 	}
-	
+
 	public void setInputString(String str) {
 		inputStreamString = str;
 	}
@@ -164,7 +168,7 @@ public class ScriptRunner implements Runnable {
 			oldInputStream = context.getInputStream();
 			context.setInputStream(new StringScriptInputStream(inputStreamString));
 		}
-		
+
 		Script script = context.getCurrentScript();
 		script.setScriptContext(context);
 		invokeScript(script);
@@ -243,12 +247,12 @@ public class ScriptRunner implements Runnable {
 		}
 		return count;
 	}
-	
+
 	public static void main(String[] args) {
 		String input = "Line1\nline2\nline3\n\nline5\n";
 		StringReader reader = new StringReader(input);
 		Scanner scanner = new Scanner(reader);
-		
+
 		try {
 			System.out.println(new String(new int[] { reader.read() }, 0, 1));
 			System.out.println(scanner.nextLine());
