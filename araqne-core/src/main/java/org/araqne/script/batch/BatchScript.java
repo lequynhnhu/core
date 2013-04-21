@@ -21,10 +21,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
+import org.araqne.api.BatchMapping;
 import org.araqne.api.PathAutoCompleter;
 import org.araqne.api.Script;
 import org.araqne.api.ScriptArgument;
@@ -34,9 +33,9 @@ import org.araqne.script.CoreScript;
 
 public class BatchScript implements Script {
 	private ScriptContext context;
-	private BatchScriptManager manager;
+	private BatchScriptManagerImpl manager;
 
-	public BatchScript(BatchScriptManager manager) {
+	public BatchScript(BatchScriptManagerImpl manager) {
 		this.manager = manager;
 	}
 
@@ -48,7 +47,7 @@ public class BatchScript implements Script {
 	@ScriptUsage(description = "", arguments = {})
 	public void list(String[] args) {
 		context.println("Batch Scripts");
-		context.println("=============");
+		context.println("---------------");
 		for (BatchMapping mapping : manager.getBatchMappings()) {
 			context.println(mapping.toString());
 		}
@@ -123,7 +122,7 @@ public class BatchScript implements Script {
 			context.printf("batch failed: %s\n", e.toString());
 		}
 	}
-	
+
 	@ScriptUsage(description = "", arguments = {
 			@ScriptArgument(name = "file path", type = "string", description = "script file path", autocompletion = PathAutoCompleter.class),
 			@ScriptArgument(name = "stop on fail", type = "boolean", description = "true if you want to stop script on fail", optional = true) })
@@ -138,7 +137,7 @@ public class BatchScript implements Script {
 		try {
 			boolean stopOnFail = true;
 			String[] scriptArgs = new String[0];
-			
+
 			if (args.length > 1) {
 				for (int idx = 1; idx < args.length - 1; ++idx) {
 					if (args[idx].equals("--")) {
@@ -147,14 +146,14 @@ public class BatchScript implements Script {
 						break;
 					}
 				}
-				
+
 			}
 
 			if (args.length > 1)
 				stopOnFail = Boolean.parseBoolean(args[1]);
 
 			File dir = (File) context.getSession().getProperty("dir");
-			if (dir != null) 
+			if (dir != null)
 				manager.executeFile(context, CoreScript.canonicalize(dir, args[0]), stopOnFail, scriptArgs);
 			else
 				manager.executeFile(context, new File(args[0]), stopOnFail, scriptArgs);

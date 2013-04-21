@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 NCHOVY
+ * Copyright 2013 Eediom, Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.araqne.script.batch;
+package org.araqne.api;
 
-import org.araqne.api.BatchScriptManager;
-import org.araqne.api.Script;
-import org.araqne.api.ScriptFactory;
-import org.araqne.main.Araqne;
+import java.io.File;
 
-public class BatchScriptFactory implements ScriptFactory {
-	private BatchScriptManagerImpl manager;
+/**
+ * @since 2.2.0
+ * @author xeraph
+ *
+ */
+public interface BatchMapping {
+	String getAlias();
 
-	public BatchScriptFactory() {
-		this.manager = new BatchScriptManagerImpl();
-		Araqne.getContext().registerService(BatchScriptManager.class.getName(), manager, null);
-	}
+	String getFilepath();
 
-	@Override
-	public Script createScript() {
-		return new BatchScript(manager);
-	}
+	File getScriptFile();
 }

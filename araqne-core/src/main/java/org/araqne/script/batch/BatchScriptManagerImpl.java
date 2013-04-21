@@ -20,11 +20,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.araqne.api.BatchMapping;
+import org.araqne.api.BatchScriptManager;
 import org.araqne.api.ScriptContext;
 import org.araqne.confdb.Config;
 import org.araqne.confdb.ConfigDatabase;
@@ -35,10 +38,10 @@ import org.araqne.main.Araqne;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-public class BatchScriptManager {
+public class BatchScriptManagerImpl implements BatchScriptManager {
 	private ConfigService conf;
 
-	public BatchScriptManager() {
+	public BatchScriptManagerImpl() {
 		BundleContext bc = Araqne.getContext();
 		ServiceReference<?> ref = bc.getServiceReference(ConfigService.class.getName());
 		this.conf = (ConfigService) bc.getService(ref);
@@ -48,29 +51,33 @@ public class BatchScriptManager {
 		return conf.ensureDatabase("araqne-core");
 	}
 
+	@Override
 	public void register(String alias, File scriptFile) {
-		getDatabase().add(new BatchMapping(alias, scriptFile));
+		getDatabase().add(new DefaultBatchMapping(alias, scriptFile));
 	}
 
+	@Override
 	public void unregister(String alias) {
 		ConfigDatabase db = getDatabase();
-		Config c = db.findOne(BatchMapping.class, Predicates.field("alias", alias));
+		Config c = db.findOne(DefaultBatchMapping.class, Predicates.field("alias", alias));
 		if (c != null)
 			db.remove(c);
 	}
 
+	@Override
 	public File getPath(String alias) {
 		ConfigDatabase db = getDatabase();
-		Config c = db.findOne(BatchMapping.class, Predicates.field("alias", alias));
+		Config c = db.findOne(DefaultBatchMapping.class, Predicates.field("alias", alias));
 		if (c == null)
 			return null;
-		return new File(c.getDocument(BatchMapping.class).getFilepath());
+		return new File(c.getDocument(DefaultBatchMapping.class).getFilepath());
 	}
 
+	@Override
 	public List<BatchMapping> getBatchMappings() {
 		List<BatchMapping> mappings = new ArrayList<BatchMapping>();
 		ConfigDatabase db = getDatabase();
-		for (BatchMapping mapping : db.findAll(BatchMapping.class).getDocuments(BatchMapping.class)) {
+		for (DefaultBatchMapping mapping : db.findAll(DefaultBatchMapping.class).getDocuments(DefaultBatchMapping.class)) {
 			mapping.setScriptFileFromFilepath();
 			mappings.add(mapping);
 		}
@@ -91,81 +98,14 @@ public class BatchScriptManager {
 	public void executeFile(ScriptContext context, File file, String[] scriptArgs) throws IOException {
 		executeFile(context, file, true, scriptArgs);
 	}
-	
-	private static Pattern ptrnInlineRedir = Pattern.compile("<<([a-zA-Z0-9]+)\\s*$"); 
+
+	private static Pattern ptrnInlineRedir = Pattern.compile("<<([a-zA-Z0-9]+)\\s*$");
 
 	public void executeFile(ScriptContext context, File file, boolean stopOnFail, String[] scriptArgs) throws IOException {
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-			String cmd = null;
-			while (true) {
-				String line = br.readLine();
-				String inlineRedirection = null;
-				
-				if (line == null)
-					break;
-				
-				line = line.trim();
-				
-				if (line.startsWith("#"))
-					continue;
-				
-				boolean followNextLine = line.endsWith("\\");
-				
-				if (followNextLine) {
-					line = line.substring(0, line.length() - 1).trim();
-				}
-				
-				if (cmd == null)
-					cmd = line;
-				else 
-					cmd += " " + line;
-				
-				if (followNextLine)
-					continue;
-				
-				if (cmd.trim().isEmpty()) {
-					cmd = null;
-					inlineRedirection = null;
-
-					continue;
-				}
-				
-				cmd = replacePlaceholders(cmd, scriptArgs);
-
-				Matcher matcher = ptrnInlineRedir.matcher(cmd);
-				if (matcher.find()) {
-					cmd = cmd.substring(0, matcher.start());
-					String endOfInputMark = matcher.group(1);
-					StringBuilder builder = new StringBuilder();
-					while(true) {
-						String l = br.readLine();
-						if (l == null)
-							throw new IllegalArgumentException("unexpected end of the file while reading inline redirection stream");
-						if (l.equals(endOfInputMark))
-							break;
-						builder.append(l);
-						builder.append("\n");
-					}
-					inlineRedirection = builder.toString();
-				}
-
-				try {
-					context.printf("executing \"%s\"\n", cmd);
-					ScriptRunner runner = new ScriptRunner(context, cmd);
-					if (inlineRedirection != null)
-						runner.setInputString(inlineRedirection);
-					runner.setPrompt(false);
-					runner.run();
-				} catch (Exception e) {
-					context.println(e.getMessage());
-					if (stopOnFail)
-						break;
-				}
-				cmd = null;
-				inlineRedirection = null;
-			}
+			runCommands(context, stopOnFail, scriptArgs, br);
 		} finally {
 			try {
 				if (br != null)
@@ -175,7 +115,86 @@ public class BatchScriptManager {
 		}
 	}
 
+	@Override
+	public void executeString(ScriptContext context, String script, boolean stopOnFail) throws IOException {
+		BufferedReader br = new BufferedReader(new StringReader(script));
+		runCommands(context, stopOnFail, new String[0], br);
+	}
+
+	private void runCommands(ScriptContext context, boolean stopOnFail, String[] scriptArgs, BufferedReader br)
+			throws IOException {
+		String cmd = null;
+		while (true) {
+			String line = br.readLine();
+			String inlineRedirection = null;
+
+			if (line == null)
+				break;
+
+			line = line.trim();
+
+			if (line.startsWith("#"))
+				continue;
+
+			boolean followNextLine = line.endsWith("\\");
+
+			if (followNextLine) {
+				line = line.substring(0, line.length() - 1).trim();
+			}
+
+			if (cmd == null)
+				cmd = line;
+			else
+				cmd += " " + line;
+
+			if (followNextLine)
+				continue;
+
+			if (cmd.trim().isEmpty()) {
+				cmd = null;
+				inlineRedirection = null;
+
+				continue;
+			}
+
+			cmd = replacePlaceholders(cmd, scriptArgs);
+
+			Matcher matcher = ptrnInlineRedir.matcher(cmd);
+			if (matcher.find()) {
+				cmd = cmd.substring(0, matcher.start());
+				String endOfInputMark = matcher.group(1);
+				StringBuilder builder = new StringBuilder();
+				while (true) {
+					String l = br.readLine();
+					if (l == null)
+						throw new IllegalArgumentException("unexpected end of the file while reading inline redirection stream");
+					if (l.equals(endOfInputMark))
+						break;
+					builder.append(l);
+					builder.append("\n");
+				}
+				inlineRedirection = builder.toString();
+			}
+
+			try {
+				context.printf("executing \"%s\"\n", cmd);
+				ScriptRunner runner = new ScriptRunner(context, cmd);
+				if (inlineRedirection != null)
+					runner.setInputString(inlineRedirection);
+				runner.setPrompt(false);
+				runner.run();
+			} catch (Exception e) {
+				context.println(e.getMessage());
+				if (stopOnFail)
+					break;
+			}
+			cmd = null;
+			inlineRedirection = null;
+		}
+	}
+
 	private static Pattern ptrnPlaceHolder = Pattern.compile("\\$\\{([0-9]+)\\}");
+
 	private String replacePlaceholders(String cmd, String[] scriptArgs) {
 		Matcher matcher = ptrnPlaceHolder.matcher(cmd);
 		StringBuilder sb = new StringBuilder();
@@ -186,7 +205,7 @@ public class BatchScriptManager {
 			oldStart = matcher.end();
 		}
 		sb.append(cmd.substring(oldStart));
-		
+
 		return sb.toString();
 	}
 

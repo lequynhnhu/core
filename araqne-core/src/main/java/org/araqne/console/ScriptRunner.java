@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 import org.araqne.api.FunctionKeyEvent;
 import org.araqne.api.FunctionKeyEventListener;

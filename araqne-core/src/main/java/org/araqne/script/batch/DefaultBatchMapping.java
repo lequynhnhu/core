@@ -17,11 +17,12 @@ package org.araqne.script.batch;
 
 import java.io.File;
 
+import org.araqne.api.BatchMapping;
 import org.araqne.api.FieldOption;
 import org.araqne.confdb.CollectionName;
 
 @CollectionName("batch")
-public class BatchMapping {
+public class DefaultBatchMapping implements BatchMapping {
 	private String alias;
 	private String filepath;
 
@@ -29,11 +30,11 @@ public class BatchMapping {
 	private File scriptFile;
 
 	@SuppressWarnings("unused")
-	private BatchMapping() {
+	private DefaultBatchMapping() {
 		// for primitive parse
 	}
 
-	public BatchMapping(String alias, File scriptFile) {
+	public DefaultBatchMapping(String alias, File scriptFile) {
 		this.alias = alias;
 		this.filepath = scriptFile.getAbsolutePath();
 		this.scriptFile = scriptFile;
