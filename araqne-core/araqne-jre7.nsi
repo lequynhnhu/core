@@ -228,11 +228,11 @@ Function GetJRE
     MessageBox MB_ICONINFORMATION "${PRODUCT_NAME} uses Java Runtime Environment ${JRE_VERSION}, it will be installed."
 	
 	${If} ${RunningX64}
-		File /oname=$TEMP\jre-6u43-windows-x64.exe "jre\jre-7u21-windows-x64.exe"
-		Execwait "$TEMP\jre-6u43-windows-x64.exe"
+		File /oname=$TEMP\jre7-x64.exe "jre\jre-7u21-windows-x64.exe"
+		Execwait "$TEMP\jre7-x64.exe"
 	${Else}
-		File /oname=$TEMP\jre-6u43-windows-i586.exe "jre\jre-7u21-windows-i586.exe"
-		Execwait "$TEMP\jre-6u43-windows-i586.exe"
+		File /oname=$TEMP\jre7-i586.exe "jre\jre-7u21-windows-i586.exe"
+		Execwait "$TEMP\jre7-i586.exe"
 	${Endif}
  
     ReadRegStr $R1 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
