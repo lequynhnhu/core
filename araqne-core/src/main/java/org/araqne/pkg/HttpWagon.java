@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
@@ -146,6 +147,8 @@ public class HttpWagon {
 			is.close();
 		}
 	}
+	
+	public static ConcurrentHashMap<String, String> realmCache = new ConcurrentHashMap<String, String>();
 
 	public static InputStream openDownloadStream(URL url, boolean useAuth, String username, String password) throws IOException {
 		Logger logger = LoggerFactory.getLogger(HttpWagon.class.getName());
@@ -160,9 +163,12 @@ public class HttpWagon {
 		client.getParams().setParameter("http.connection.timeout", connectionTimeout);
 		client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, null);
 
+		String realm = "";
 		if (useAuth) {
 			client.getParams().setAuthenticationPreemptive(true);
-			setClientAuth(url, username, password, "", client);
+			if (realmCache.containsKey(getRealmCacheKey(url))) 
+				realm = realmCache.get(getRealmCacheKey(url));
+			setClientAuth(url, username, password, realm, client);
 		}
 
 		HttpMethod method = new GetMethod(url.toString());
@@ -170,12 +176,14 @@ public class HttpWagon {
 		int statusCode = client.executeMethod(method);
 
 		if (useAuth && statusCode == HttpStatus.SC_UNAUTHORIZED) {
-			String realm = getRealm(method);
+			realm = getRealm(method);
 			setClientAuth(url, username, password, realm, client);
 			method = new GetMethod(url.toString());
 			statusCode = client.executeMethod(method);
 			if (statusCode != HttpStatus.SC_OK) {
 				throw new IOException("digest auth failed: " + method.getStatusLine());
+			} else {
+				realmCache.put(getRealmCacheKey(url), realm);
 			}
 		}
 		
@@ -184,6 +192,10 @@ public class HttpWagon {
 		}
 
 		return method.getResponseBodyAsStream();
+	}
+
+	private static String getRealmCacheKey(URL url) {
+		return url.getHost() + ":" + url.getPort();
 	}
 
 	private static void setClientAuth(URL url, String username, String password, String realm, HttpClient client) {
