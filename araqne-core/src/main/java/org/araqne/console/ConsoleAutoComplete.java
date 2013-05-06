@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 
 import org.araqne.api.Script;
@@ -167,6 +168,7 @@ public class ConsoleAutoComplete {
 	}
 
 	private void addScriptAliases(String prefix, List<ScriptAutoCompletion> terms) {
+		HashSet<String> aliases = new HashSet<String>();
 		try {
 			ServiceReference<?>[] refs = bundleContext.getServiceReferences(ScriptFactory.class.getName(), null);
 			if (refs == null)
@@ -175,8 +177,10 @@ public class ConsoleAutoComplete {
 			for (int i = 0; i < refs.length; i++) {
 				if (refs[i].getProperty("alias") != null) {
 					String alias = refs[i].getProperty("alias").toString();
-					if (alias.startsWith(prefix))
+					if (alias.startsWith(prefix) && !aliases.contains(alias)) {
 						terms.add(new ScriptAutoCompletion(alias));
+						aliases.add(alias);
+					}
 				}
 			}
 
