@@ -54,13 +54,12 @@ public class ConsoleAutoComplete {
 				addScriptMethods("core." + prefix, terms);
 			}
 		} else {
+			// argument completion using autocompletion helper
 			try {
 				int p = tokens[0].indexOf('.');
 				String alias = p > 0 ? tokens[0].substring(0, p) : "core";
 				String method = p > 0 ? tokens[0].substring(p + 1) : tokens[0];
-				Script script = newScript(alias);
-
-				Method m = script.getClass().getDeclaredMethod(method, new Class[] { String[].class });
+				Method m = findScriptMethod(alias, method);
 				if (m == null)
 					return terms;
 
@@ -80,8 +79,6 @@ public class ConsoleAutoComplete {
 				String nextToken = prefix.endsWith(" ") ? "" : tokens[tokens.length - 1];
 				ScriptAutoCompletionHelper helper = (ScriptAutoCompletionHelper) arg.autocompletion().newInstance();
 				return helper.matches(session, nextToken);
-			} catch (NoSuchMethodException e) {
-				logger.debug("araqne core: cannot auto-complete", e);
 			} catch (Throwable e) {
 				logger.error("araqne core: cannot auto-complete", e);
 			}
@@ -109,18 +106,19 @@ public class ConsoleAutoComplete {
 			String alias = token.substring(0, dotPos);
 			String methodPrefix = token.substring(dotPos + 1);
 
-			Script script = newScript(alias);
-			for (Method m : script.getClass().getMethods()) {
-				Class<?>[] paramTypes = m.getParameterTypes();
-				if (paramTypes == null || paramTypes.length == 0) {
-					continue;
-				}
+			for (Script script : getScripts(alias)) {
+				for (Method m : script.getClass().getMethods()) {
+					Class<?>[] paramTypes = m.getParameterTypes();
+					if (paramTypes == null || paramTypes.length == 0) {
+						continue;
+					}
 
-				if (!paramTypes[0].isArray())
-					continue;
+					if (!paramTypes[0].isArray())
+						continue;
 
-				if (methodPrefix.length() == 0 || (methodPrefix.length() > 0 && m.getName().startsWith(methodPrefix))) {
-					terms.add(new ScriptAutoCompletion(m.getName()));
+					if (methodPrefix.length() == 0 || (methodPrefix.length() > 0 && m.getName().startsWith(methodPrefix))) {
+						terms.add(new ScriptAutoCompletion(m.getName()));
+					}
 				}
 			}
 		} catch (NullPointerException e) {
@@ -128,7 +126,7 @@ public class ConsoleAutoComplete {
 		}
 	}
 
-	private Script newScript(String alias) {
+	private Method findScriptMethod(String alias, String method) {
 		ServiceReference<?>[] refs;
 		try {
 			refs = bundleContext.getServiceReferences(ScriptFactory.class.getName(), "(alias=" + alias + ")");
@@ -136,9 +134,33 @@ public class ConsoleAutoComplete {
 				return null;
 			}
 
-			ScriptFactory scriptFactory = (ScriptFactory) bundleContext.getService(refs[0]);
-			Script script = scriptFactory.createScript();
-			return script;
+			for (ServiceReference<?> ref : refs) {
+				ScriptFactory scriptFactory = (ScriptFactory) bundleContext.getService(ref);
+				Script script = scriptFactory.createScript();
+				try {
+					return script.getClass().getDeclaredMethod(method, new Class[] { String[].class });
+				} catch (Exception e) {
+				}
+			}
+		} catch (InvalidSyntaxException e) {
+		}
+		return null;
+	}
+
+	private List<Script> getScripts(String alias) {
+		List<Script> scripts = new ArrayList<Script>();
+		ServiceReference<?>[] refs;
+		try {
+			refs = bundleContext.getServiceReferences(ScriptFactory.class.getName(), "(alias=" + alias + ")");
+			if (refs == null || refs.length == 0) {
+				return null;
+			}
+
+			for (ServiceReference<?> ref : refs) {
+				ScriptFactory scriptFactory = (ScriptFactory) bundleContext.getService(ref);
+				scripts.add(scriptFactory.createScript());
+			}
+			return scripts;
 		} catch (InvalidSyntaxException e) {
 			return null;
 		}

@@ -118,6 +118,13 @@ public class ScriptRunner implements Runnable {
 		this.context = context;
 		this.args = getArguments(tokens);
 
+		prepareScript(context, alias);
+
+		// reset script command history
+		context.setInputStream(new ConsoleInputStream(context));
+	}
+
+	private void prepareScript(ScriptContext context, String alias) {
 		ServiceReference<?>[] refs = null;
 		try {
 			refs = Araqne.getContext().getServiceReferences(ScriptFactory.class.getName(), "(alias=" + alias + ")");
@@ -128,17 +135,27 @@ public class ScriptRunner implements Runnable {
 		if (refs == null || refs.length == 0)
 			throw new NullPointerException("script not found.");
 
-		ScriptFactory scriptFactory = (ScriptFactory) Araqne.getContext().getService(refs[0]);
-		if (scriptFactory == null) {
+		Script foundScript = null;
+		for (ServiceReference<?> ref : refs) {
+			ScriptFactory scriptFactory = (ScriptFactory) Araqne.getContext().getService(ref);
+			if (scriptFactory == null)
+				continue;
+
+			Script script = scriptFactory.createScript();
+			try {
+				script.getClass().getDeclaredMethod(methodName, new Class[] { String[].class });
+				foundScript = script;
+			} catch (Exception e) {
+			}
+
+			Araqne.getContext().ungetService(ref);
+		}
+
+		if (foundScript == null) {
 			throw new NullPointerException("script not found.");
 		}
 
-		Script script = scriptFactory.createScript();
-		context.setCurrentScript(script);
-
-		// reset script command history
-		context.setInputStream(new ConsoleInputStream(context));
-		Araqne.getContext().ungetService(refs[0]);
+		context.setCurrentScript(foundScript);
 	}
 
 	public void setPrompt(boolean enabled) {
