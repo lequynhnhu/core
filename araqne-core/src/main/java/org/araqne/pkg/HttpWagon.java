@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
@@ -39,6 +40,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
@@ -145,34 +147,74 @@ public class HttpWagon {
 			is.close();
 		}
 	}
+	
+	public static ConcurrentHashMap<String, String> realmCache = new ConcurrentHashMap<String, String>();
 
 	public static InputStream openDownloadStream(URL url, boolean useAuth, String username, String password) throws IOException {
 		Logger logger = LoggerFactory.getLogger(HttpWagon.class.getName());
 		logger.trace("http wagon: downloading {}", url);
 
-		HttpClient client = new HttpClient();
-		if (useAuth) {
-			client.getParams().setAuthenticationPreemptive(true);
-			Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
-			client.getState().setCredentials(new AuthScope(url.getHost(), url.getPort(), AuthScope.ANY_REALM), defaultcreds);
-		}
-
-		HttpMethod method = new GetMethod(url.toString());
-
 		int socketTimeout = getSocketTimeout();
 		int connectionTimeout = getConnectTimeout();
+
+		HttpClient client = new HttpClient();
 
 		client.getParams().setParameter("http.socket.timeout", socketTimeout);
 		client.getParams().setParameter("http.connection.timeout", connectionTimeout);
 		client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, null);
 
+		String realm = "";
+		if (useAuth) {
+			client.getParams().setAuthenticationPreemptive(true);
+			if (realmCache.containsKey(getRealmCacheKey(url))) 
+				realm = realmCache.get(getRealmCacheKey(url));
+			setClientAuth(url, username, password, realm, client);
+		}
+
+		HttpMethod method = new GetMethod(url.toString());
+
 		int statusCode = client.executeMethod(method);
 
+		if (useAuth && statusCode == HttpStatus.SC_UNAUTHORIZED) {
+			realm = getRealm(method);
+			setClientAuth(url, username, password, realm, client);
+			method = new GetMethod(url.toString());
+			statusCode = client.executeMethod(method);
+			if (statusCode != HttpStatus.SC_OK) {
+				throw new IOException("digest auth failed: " + method.getStatusLine());
+			} else {
+				realmCache.put(getRealmCacheKey(url), realm);
+			}
+		}
+		
 		if (statusCode != HttpStatus.SC_OK) {
 			throw new IOException("method failed: " + method.getStatusLine());
 		}
 
 		return method.getResponseBodyAsStream();
+	}
+
+	private static String getRealmCacheKey(URL url) {
+		return url.getHost() + ":" + url.getPort();
+	}
+
+	private static void setClientAuth(URL url, String username, String password, String realm, HttpClient client) {
+		Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
+		client.getState().setCredentials(new AuthScope(url.getHost(), url.getPort(), realm), defaultcreds);
+	}
+	
+	private static String getRealm(HttpMethod method) throws IOException {
+		Header responseHeader = method.getResponseHeader("WWW-Authenticate");
+		if (responseHeader != null) {
+			String value = responseHeader.getValue();
+			String realmStr = "realm=\"";
+			int realmPos = value.indexOf(realmStr);
+			if (realmPos == -1)
+				throw new IOException("digest auth failed: Unsupported auth scheme");
+			int realmEndPos = value.indexOf("\"", realmPos + realmStr.length() + 1);
+			return value.substring(realmPos + realmStr.length(), realmEndPos);
+		}
+		return null;
 	}
 
 	private static int getSocketTimeout() {
