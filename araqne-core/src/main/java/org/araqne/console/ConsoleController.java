@@ -101,6 +101,12 @@ public class ConsoleController {
 			}
 			int hmax = sc.getWidth() / (maxlen + 2);
 			int vmax = terms.size() / hmax + 1;
+			int[] colmax = new int[hmax];
+			for (int i = 0; i < hmax; ++i) {
+				for (ScriptAutoCompletion term : terms.subList(Math.min(terms.size(), vmax * i), Math.min(terms.size(), vmax * (i + 1)))) {
+					colmax[i] = Math.max(colmax[i], term.getSuggestion().length());			
+				}
+			}
 			for (int i = 0; i < hmax * vmax; ++i) {
 				int h = i % hmax;
 				int v = i / hmax;
@@ -108,7 +114,7 @@ public class ConsoleController {
 				if (t < terms.size()) {
 					String term = terms.get(t).getSuggestion();
 					out.print(term);
-					out.print(String.format("%"+(maxlen - term.length() + 1)+"s", "  "));
+					out.print(String.format("%"+(colmax[h] - term.length() + 2)+"s", "  "));
 				}
 				if (h + 1 == hmax)
 					out.print("\r\n");
