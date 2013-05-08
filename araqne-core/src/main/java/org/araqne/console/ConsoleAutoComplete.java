@@ -109,7 +109,6 @@ public class ConsoleAutoComplete {
 			String alias = token.substring(0, dotPos);
 			String methodPrefix = token.substring(dotPos + 1);
 
-			Matcher nameMatcher = Pattern.compile(makePattern(methodPrefix)).matcher("");
 			for (Script script : getScripts(alias)) {
 				for (Method m : script.getClass().getMethods()) {
 					Class<?>[] paramTypes = m.getParameterTypes();
@@ -120,9 +119,30 @@ public class ConsoleAutoComplete {
 					if (!paramTypes[0].isArray())
 						continue;
 
-					nameMatcher.reset(m.getName().toLowerCase());
-					if (methodPrefix.length() == 0 || (methodPrefix.length() > 0 && nameMatcher.matches())) {
+					String lname = m.getName().toLowerCase();
+					if (methodPrefix.length() == 0 || (methodPrefix.length() > 0 && lname.startsWith(methodPrefix.toLowerCase()))) {
 						terms.add(new ScriptAutoCompletion(m.getName()));
+					}
+				}
+			}
+			
+			// try more match with fuzzing
+			if (terms.isEmpty()) {
+				Matcher nameMatcher = Pattern.compile(makePattern(methodPrefix)).matcher("");
+				for (Script script : getScripts(alias)) {
+					for (Method m : script.getClass().getMethods()) {
+						Class<?>[] paramTypes = m.getParameterTypes();
+						if (paramTypes == null || paramTypes.length == 0) {
+							continue;
+						}
+
+						if (!paramTypes[0].isArray())
+							continue;
+
+						nameMatcher.reset(m.getName().toLowerCase());
+						if (methodPrefix.length() == 0 || (methodPrefix.length() > 0 && nameMatcher.matches())) {
+							terms.add(new ScriptAutoCompletion(m.getName()));
+						}
 					}
 				}
 			}

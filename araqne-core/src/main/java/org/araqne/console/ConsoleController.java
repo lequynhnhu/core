@@ -99,9 +99,7 @@ public class ConsoleController {
 			for (ScriptAutoCompletion term : terms) {
 				maxlen = Math.max(maxlen, term.getSuggestion().length());			
 			}
-			int curpos = 0;
-			StringBuilder sugBuilder = new StringBuilder();
-			int hmax = sc.getWidth() / maxlen;
+			int hmax = sc.getWidth() / (maxlen + 2);
 			int vmax = terms.size() / hmax + 1;
 			for (int i = 0; i < hmax * vmax; ++i) {
 				int h = i % hmax;
@@ -110,7 +108,7 @@ public class ConsoleController {
 				if (t < terms.size()) {
 					String term = terms.get(t).getSuggestion();
 					out.print(term);
-					out.print(String.format("%"+(maxlen - term.length() + 1)+"s", " "));
+					out.print(String.format("%"+(maxlen - term.length() + 1)+"s", "  "));
 				}
 				if (h + 1 == hmax)
 					out.print("\r\n");
