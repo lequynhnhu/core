@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.araqne.api.Script;
 import org.araqne.api.ScriptArgument;
@@ -43,7 +45,7 @@ public class ConsoleAutoComplete {
 		this.bundleContext = bundleContext;
 	}
 
-	public List<ScriptAutoCompletion> search(ScriptSession session, String prefix) {
+	public List<ScriptAutoCompletion> search(ScriptSession session, String prefix, String[] hint) {
 		String[] tokens = ScriptArgumentParser.tokenize(prefix);
 
 		List<ScriptAutoCompletion> terms = new ArrayList<ScriptAutoCompletion>();
@@ -107,6 +109,7 @@ public class ConsoleAutoComplete {
 			String alias = token.substring(0, dotPos);
 			String methodPrefix = token.substring(dotPos + 1);
 
+			Matcher nameMatcher = Pattern.compile(makePattern(methodPrefix)).matcher("");
 			for (Script script : getScripts(alias)) {
 				for (Method m : script.getClass().getMethods()) {
 					Class<?>[] paramTypes = m.getParameterTypes();
@@ -117,7 +120,8 @@ public class ConsoleAutoComplete {
 					if (!paramTypes[0].isArray())
 						continue;
 
-					if (methodPrefix.length() == 0 || (methodPrefix.length() > 0 && m.getName().startsWith(methodPrefix))) {
+					nameMatcher.reset(m.getName().toLowerCase());
+					if (methodPrefix.length() == 0 || (methodPrefix.length() > 0 && nameMatcher.matches())) {
 						terms.add(new ScriptAutoCompletion(m.getName()));
 					}
 				}
@@ -125,6 +129,17 @@ public class ConsoleAutoComplete {
 		} catch (NullPointerException e) {
 			// ignore
 		}
+	}
+
+	private String makePattern(String methodPrefix) {
+		String lc = methodPrefix.toLowerCase();
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < lc.length(); ++i) {
+			sb.append(".*");
+			sb.append(lc.charAt(i));
+		}
+		sb.append(".*");
+		return sb.toString();
 	}
 
 	private Method findScriptMethod(String alias, String method) {

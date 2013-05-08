@@ -91,22 +91,55 @@ public class ConsoleController {
 		ScriptOutputStream out = sc.getOutputStream();
 		String lastToken = getLastToken(input);
 
-		List<ScriptAutoCompletion> terms = autoComplete.search(sc.getSession(), input);
+		String[] hint = new String[1];
+		List<ScriptAutoCompletion> terms = autoComplete.search(sc.getSession(), input, hint);
 		if (terms.size() > 1) {
 			out.print("\r\n");
+			int maxlen = 0;
 			for (ScriptAutoCompletion term : terms) {
-				out.print(term.getSuggestion());
-				out.print(" ");
+				maxlen = Math.max(maxlen, term.getSuggestion().length());			
 			}
-			out.print("\r\n");
+			int curpos = 0;
+			StringBuilder sugBuilder = new StringBuilder();
+			int hmax = sc.getWidth() / maxlen;
+			int vmax = terms.size() / hmax + 1;
+			for (int i = 0; i < hmax * vmax; ++i) {
+				int h = i % hmax;
+				int v = i / hmax;
+				int t = vmax * h + v;
+				if (t < terms.size()) {
+					String term = terms.get(t).getSuggestion();
+					out.print(term);
+					out.print(String.format("%"+(maxlen - term.length() + 1)+"s", " "));
+				}
+				if (h + 1 == hmax)
+					out.print("\r\n");
+			}
 			sc.printPrompt();
 			String commonPrefix = extractCommonPrefix(terms);
 			String remainingCommonPrefix = "";
-			if (commonPrefix.length() >= lastToken.length())
-				remainingCommonPrefix = commonPrefix.substring(lastToken.length());
-			String semiCompletedLine = input + remainingCommonPrefix;
+			String semiCompletedLine = null;
+			int charToRemove = 0;
+			if (commonPrefix.length() >= lastToken.length()) {
+				if (commonPrefix.startsWith(lastToken)) {
+					remainingCommonPrefix = commonPrefix.substring(lastToken.length());
+					semiCompletedLine = input + remainingCommonPrefix;
+				} else {
+					charToRemove = lastToken.length();
+					semiCompletedLine = input.substring(0, input.length() - lastToken.length()) + commonPrefix;
+					remainingCommonPrefix = commonPrefix;
+				}
+			} else {
+				semiCompletedLine = input;
+				remainingCommonPrefix = "";
+			}
+
 			if (semiCompletedLine.length() != 0) {
 				out.print(semiCompletedLine);
+			}
+			for (int i = 0; i < charToRemove; ++i) {
+				dataList.pollLast();
+				decreaseCursorPos();
 			}
 			for (int i = 0; i < remainingCommonPrefix.length(); ++i) {
 				dataList.add(cursorPos, Character.toString(remainingCommonPrefix.charAt(i)));
@@ -114,9 +147,20 @@ public class ConsoleController {
 			}
 		} else if (terms.size() == 1) {
 			String term = terms.get(0).getCompletion();
-
-			String completion = term.substring(lastToken.length());
+			String completion = null;
+			int charToRemove = 0;
+			if (term.startsWith(lastToken)) {
+				completion = term.substring(lastToken.length());
+			} else {
+				charToRemove = lastToken.length();
+				completion = term;
+			}
 			if (completion.length() > 0) {
+				for (int i = 0; i < charToRemove; ++i) {
+					dataList.pollLast();
+					decreaseCursorPos();
+					out.print("\b");
+				}
 				for (int i = 0; i < completion.length(); i++) {
 					dataList.add(cursorPos, Character.toString(completion.charAt(i)));
 					increaseCursorPos();
