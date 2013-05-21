@@ -44,6 +44,26 @@ public class CollectionASCIITableAware<T> implements IASCIITableAware {
 	private List<ASCIITableHeader> headers = null;
 	private List<List<Object>> data = null;
 	
+	public CollectionASCIITableAware(List<T> objList, PropertyColumn ... columns) {
+		this(objList, getProperties(columns), getTitles(columns));
+	}
+	
+	private static List<String> getProperties(PropertyColumn[] columns) {
+		ArrayList<String> result = new ArrayList<String>(columns.length);
+		for (PropertyColumn c: columns) {
+			result.add(c.getProperty());
+		}
+		return result;
+	}
+
+	private static List<String> getTitles(PropertyColumn[] columns) {
+		ArrayList<String> result = new ArrayList<String>(columns.length);
+		for (PropertyColumn c: columns) {
+			result.add(c.getTitle());
+		}
+		return result;
+	}
+
 	public CollectionASCIITableAware(List<T> objList, String ... properties) {
 		this(objList, Arrays.asList(properties), Arrays.asList(properties));
 	}
