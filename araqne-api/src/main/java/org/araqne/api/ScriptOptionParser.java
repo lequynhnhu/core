@@ -50,6 +50,9 @@ public class ScriptOptionParser {
 				break;
 			}
 			if (arg.startsWith("-") && (arg.startsWith(pfshort) || arg.startsWith(pflong))) {
+				if (option != null && needsArg) {
+					throw new IllegalArgumentException("no argument supplied for option \"" + option.name + "\"");
+				}
 				if (option == null)
 					option = new ScriptOption(shortOpt, longOpt);
 				boolean isShort = arg.startsWith(pfshort);
