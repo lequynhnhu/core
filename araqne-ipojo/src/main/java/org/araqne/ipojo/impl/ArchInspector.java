@@ -24,6 +24,7 @@ import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.IPojoFactory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
+import org.apache.felix.ipojo.metadata.Element;
 import org.araqne.api.ScriptOutputStream;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -155,7 +156,9 @@ public class ArchInspector {
 				Architecture arch = (Architecture) bundleContext.getService(refs[i]);
 				InstanceDescription instance = arch.getInstanceDescription();
 				if (instance.getName().equalsIgnoreCase(name)) {
-					out.println(instance.getDescription().toString().replace("\n", "\r\n"));
+					String desc = instance.getDescription().toString();
+					desc = desc.replace("unresolved", "\u001b[37;1m" + "unresolved" + "\u001b[0m");
+					out.println(desc.replace("\n", "\r\n"));
 					return;
 				}
 			}
