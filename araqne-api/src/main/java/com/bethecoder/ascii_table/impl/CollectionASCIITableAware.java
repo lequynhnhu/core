@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.bethecoder.ascii_table.ASCIITableHeader;
+import com.bethecoder.ascii_table.spec.IASCIITable;
 import com.bethecoder.ascii_table.spec.IASCIITableAware;
 
 /**
@@ -55,7 +56,15 @@ public class CollectionASCIITableAware<T> implements IASCIITableAware {
 			headers = new ArrayList<ASCIITableHeader>(properties.size());
 			for (int i = 0 ; i < properties.size() ; i ++) {
 				header = (i < title.size()) ? title.get(i) : properties.get(i);
-				headers.add(new ASCIITableHeader(String.valueOf(header)));
+				int dataAlign = IASCIITable.DEFAULT_DATA_ALIGN;
+				if (header.startsWith("c!")) {
+					header = header.substring(2);
+					dataAlign = IASCIITable.ALIGN_CENTER;
+				} else if (header.startsWith("l!")) {
+					header = header.substring(2);
+					dataAlign = IASCIITable.ALIGN_LEFT;
+				}
+				headers.add(new ASCIITableHeader(String.valueOf(header), dataAlign));
 			}
 			
 			//Populate data
