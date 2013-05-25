@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import org.apache.mina.core.filterchain.IoFilter.NextFilter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
+import org.apache.sshd.common.PtyMode;
 import org.apache.sshd.common.SshException;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
@@ -83,6 +84,8 @@ public class SshShell implements Command, Runnable, QuitHandler {
 		int width = Integer.parseInt(env.getEnv().get(Environment.ENV_COLUMNS));
 		int height = Integer.parseInt(env.getEnv().get(Environment.ENV_LINES));
 		context.setWindowSize(width, height);
+		
+		env.getPtyModes().put(PtyMode.ONOCR, 1);
 
 		String username = env.getEnv().get(Environment.ENV_USER);
 		session.setPrincipal(username);
@@ -176,6 +179,7 @@ public class SshShell implements Command, Runnable, QuitHandler {
 		@Override
 		public ScriptOutputStream print(String value) {
 			try {
+				value = value.replaceAll("\n", "\r\n");
 				byte[] b = value.getBytes("utf-8");
 				out.write(b);
 				out.flush();
