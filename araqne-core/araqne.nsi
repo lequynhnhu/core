@@ -158,7 +158,7 @@ Function AddService
 		StrCpy $R0 "$INSTDIR\procrun\araqnecore.exe"
 	${Endif}
 ;	MessageBox MB_OK "$R0"
-	ExecWait `"$R0$\" //IS//$\"Araqne_Core$\" --Install=$\"$R0$\" --Description=$\"Araqne Core ${ARAQNE_CORE_VERSION}$\" --Jvm=$\"$R1$\" --Startup=auto --StartMode=jvm --Classpath=$\"$INSTDIR\araqne-core-${ARAQNE_CORE_VERSION}-package.jar$\" --StartClass=org.araqne.main.Araqne --StartMethod=windowsService --StartParams=start --StopMode=jvm --StopClass=org.araqne.main.Araqne --StopMethod=windowsService --StopParams=stop --LogPath=$\"$INSTDIR\log$\" --StdError=auto --StdOutput=auto --StartPath=$\"$INSTDIR"`
+	ExecWait `"$R0$\" //IS//$\"Araqne_Core$\" --Install=$\"$R0$\" --Description=$\"Araqne Core ${ARAQNE_CORE_VERSION}$\" --Jvm=$\"$R1$\" --Startup=auto --StartMode=jvm --Classpath=$\"$INSTDIR\araqne-core-${ARAQNE_CORE_VERSION}-package.jar$\" --StartClass=org.araqne.main.Araqne --StartMethod=windowsService --StartParams=start --StopMode=jvm --StopClass=org.araqne.main.Araqne --StopMethod=windowsService --StopParams=stop --LogPath=$\"$INSTDIR\log$\" --StdError=NUL --StdOutput=NUL --StartPath=$\"$INSTDIR"`
 
 FunctionEnd
 
