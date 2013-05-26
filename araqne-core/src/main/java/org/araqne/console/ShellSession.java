@@ -49,7 +49,7 @@ public class ShellSession {
 	}
 
 	public void printBanner() {
-		sc.getOutputStream().println(Araqne.BANNER);
+		sc.getOutputStream().println("\r" + Araqne.BANNER);
 	}
 
 	public void handleMessage(Object message) throws InterruptedException, IOException {
