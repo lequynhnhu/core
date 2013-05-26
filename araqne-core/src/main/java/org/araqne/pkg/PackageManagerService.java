@@ -91,7 +91,7 @@ public class PackageManagerService implements PackageManager {
 			MavenResolveException, KeyStoreException, UnrecoverableKeyException, KeyManagementException {
 		PackageUpdatePlan dep = getUpdatePlan(packageName, version);
 
-		PackageMetadata metadata = downloadMetadata(packageName);
+		PackageMetadata metadata = downloadMetadata(packageName, monitor);
 		PackageVersionHistory choice = findPackageVersionHistory(version, metadata);
 		PackageDescriptor newPkg = downloadPackageDesc(metadata, choice);
 
@@ -126,7 +126,7 @@ public class PackageManagerService implements PackageManager {
 		if (pkg != null)
 			throw new AlreadyInstalledPackageException(pkg);
 
-		PackageMetadata metadata = downloadMetadata(packageName);
+		PackageMetadata metadata = downloadMetadata(packageName, monitor);
 		if (metadata == null)
 			throw new PackageNotFoundException(packageName);
 
@@ -418,7 +418,7 @@ public class PackageManagerService implements PackageManager {
 			KeyStoreException, UnrecoverableKeyException, KeyManagementException {
 		PackageUpdatePlan dep = new PackageUpdatePlan();
 
-		PackageMetadata metadata = downloadMetadata(packageName);
+		PackageMetadata metadata = downloadMetadata(packageName, null);
 		if (metadata == null)
 			throw new PackageNotFoundException(packageName);
 
@@ -559,13 +559,16 @@ public class PackageManagerService implements PackageManager {
 		throw new PackageNotFoundException(metadata.getName());
 	}
 
-	private PackageMetadata downloadMetadata(String packageName) throws KeyStoreException, UnrecoverableKeyException,
-			KeyManagementException {
+	private PackageMetadata downloadMetadata(String packageName, ProgressMonitor monitor) throws KeyStoreException,
+			UnrecoverableKeyException, KeyManagementException {
+		if (monitor != null)
+			monitor.writeln("Resolving " + packageName + " package");
+
 		List<PackageRepository> repositories = getRepositories();
 		PackageMetadata metadata = null;
 
 		for (PackageRepository repo : repositories) {
-			metadata = downloadMetadata(repo, packageName);
+			metadata = downloadMetadata(repo, packageName, monitor);
 			if (metadata != null)
 				break;
 		}
@@ -573,16 +576,28 @@ public class PackageManagerService implements PackageManager {
 		return metadata;
 	}
 
-	private PackageMetadata downloadMetadata(PackageRepository repository, String packageName) throws KeyStoreException,
-			UnrecoverableKeyException, KeyManagementException {
+	private PackageMetadata downloadMetadata(PackageRepository repository, String packageName, ProgressMonitor monitor)
+			throws KeyStoreException, UnrecoverableKeyException, KeyManagementException {
 		try {
 			URL url = new URL(normalize(repository.getUrl()) + packageName + "/araqne.package");
+			if (monitor != null)
+				monitor.write("  -> trying to download from " + repository.getUrl());
+
 			String body = downloadString(repository, url);
 			PackageMetadata metadata = PackageMetadataParser.parse(body);
 			metadata.setName(packageName);
 			metadata.setRepository(repository);
+
+			if (monitor != null)
+				monitor.writeln(" (found)");
+
 			return metadata;
 		} catch (IOException e) {
+			if (monitor != null && e.getMessage().contains("digest auth failed"))
+				monitor.writeln(" (auth fail)");
+			else
+				monitor.writeln(" (not found)");
+
 			return null;
 		}
 	}
@@ -661,7 +676,7 @@ public class PackageManagerService implements PackageManager {
 	@Override
 	public PackageVersionHistory getLatestVersion(String packageName) throws PackageNotFoundException, KeyStoreException,
 			UnrecoverableKeyException, KeyManagementException {
-		PackageMetadata metadata = downloadMetadata(packageName);
+		PackageMetadata metadata = downloadMetadata(packageName, null);
 		if (metadata == null)
 			throw new PackageNotFoundException(packageName);
 
@@ -671,7 +686,7 @@ public class PackageManagerService implements PackageManager {
 	@Override
 	public PackageVersionHistory checkUpdate(String packageName) throws PackageNotFoundException, KeyStoreException,
 			UnrecoverableKeyException, KeyManagementException {
-		PackageMetadata metadata = downloadMetadata(packageName);
+		PackageMetadata metadata = downloadMetadata(packageName, null);
 		if (metadata == null)
 			throw new PackageNotFoundException(packageName);
 

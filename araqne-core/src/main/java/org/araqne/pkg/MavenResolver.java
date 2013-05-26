@@ -168,7 +168,7 @@ public class MavenResolver {
 			URL jarUrl = getJarUrl(repo.getUrl(), artifact);
 
 			if (monitor != null)
-				monitor.writeln("  -> trying to download from " + repo);
+				monitor.write("  -> trying to download from " + repo);
 
 			byte[] b = new byte[8096];
 
@@ -186,7 +186,15 @@ public class MavenResolver {
 
 						pomStream.write(b, 0, read);
 					}
+
+					if (monitor != null)
+						monitor.writeln("");
 				} catch (Exception e) {
+					if (monitor != null && e.getMessage().contains("digest auth failed"))
+						monitor.writeln(" (auth fail)");
+					else
+						monitor.writeln(" (not found)");
+
 					logger.info("maven resolver: failed to get {} {}", pomUrl, e.getMessage());
 					return null;
 				} finally {
