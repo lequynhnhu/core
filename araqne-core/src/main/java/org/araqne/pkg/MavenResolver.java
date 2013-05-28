@@ -170,12 +170,12 @@ public class MavenResolver {
 			if (monitor != null)
 				monitor.write("  -> trying to download from " + repo);
 
-			byte[] b = new byte[8096];
-
-			// download pom
 			InputStream is = null;
-			if (localPom.exists() == false) {
-				try {
+			try {
+				byte[] b = new byte[8096];
+
+				// download pom
+				if (localPom.exists() == false) {
 					is = download(repo, pomUrl);
 					pomStream = new FileOutputStream(localPom, false);
 
@@ -186,28 +186,12 @@ public class MavenResolver {
 
 						pomStream.write(b, 0, read);
 					}
-
-					if (monitor != null)
-						monitor.writeln("");
-				} catch (Exception e) {
-					if (monitor != null && e.getMessage().contains("digest auth failed"))
-						monitor.writeln(" (auth fail)");
-					else
-						monitor.writeln(" (not found)");
-
-					logger.info("maven resolver: failed to get {} {}", pomUrl, e.getMessage());
-					return null;
-				} finally {
-					ensureClose(is);
 				}
-			}
 
-			if (localJar.getAbsolutePath().replace("\\", "/").equals(jarUrl.getPath().substring(1)))
-				return localJar;
+				if (localJar.getAbsolutePath().replace("\\", "/").equals(jarUrl.getPath().substring(1)))
+					return localJar;
 
-			// download jar
-			is = null;
-			try {
+				// download jar
 				is = download(repo, jarUrl);
 				jarStream = new FileOutputStream(localJar, false);
 
@@ -218,21 +202,26 @@ public class MavenResolver {
 
 					jarStream.write(b, 0, read);
 				}
+				return localJar;
 			} catch (Exception e) {
-				logger.info("maven resolver: failed to get {} {}", jarUrl, e.getMessage());
-				return null;
+				if (monitor != null && e.getMessage().contains("digest auth failed"))
+					monitor.write(" (auth fail)");
+				else
+					monitor.write(" (not found)");
+
+				logger.info("maven resolver: failed to get {} {}", pomUrl, e.getMessage());
 			} finally {
+				if (monitor != null)
+					monitor.writeln("");
 				ensureClose(is);
 			}
-
-			return localJar;
 		} catch (MalformedURLException e) {
 			logger.info("maven resolver: malformed url", e);
-			return null;
 		} finally {
 			ensureClose(pomStream);
 			ensureClose(jarStream);
 		}
+		return null;
 	}
 
 	private void ensureClose(InputStream is) {

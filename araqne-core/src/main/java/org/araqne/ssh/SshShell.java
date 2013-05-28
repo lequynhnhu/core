@@ -17,6 +17,7 @@ package org.araqne.ssh;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import org.apache.mina.core.filterchain.IoFilter.NextFilter;
@@ -27,6 +28,8 @@ import org.apache.sshd.common.SshException;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
+import org.apache.sshd.server.Signal;
+import org.apache.sshd.server.SignalListener;
 import org.araqne.ansicode.AnsiEscapeCode;
 import org.araqne.api.ScriptOutputStream;
 import org.araqne.api.TelnetCommand;
@@ -47,6 +50,8 @@ public class SshShell implements Command, Runnable, QuitHandler {
 	private Thread thread;
 	private TelnetStateMachine tsm;
 	private ScriptContextImpl context;
+	private String username;
+	private boolean closed = false;
 
 	public SshShell() {
 		context = new ScriptContextImpl(Araqne.getContext(), this);
@@ -83,11 +88,19 @@ public class SshShell implements Command, Runnable, QuitHandler {
 	public void start(Environment env) throws IOException {
 		int width = Integer.parseInt(env.getEnv().get(Environment.ENV_COLUMNS));
 		int height = Integer.parseInt(env.getEnv().get(Environment.ENV_LINES));
+		
 		context.setWindowSize(width, height);
+		
+		env.addSignalListener(new SignalListener() {
+			@Override
+			public void signal(Signal signal) {
+				logger.info(signal.toString());
+			}
+		});
 		
 		env.getPtyModes().put(PtyMode.ONOCR, 1);
 
-		String username = env.getEnv().get(Environment.ENV_USER);
+		username = env.getEnv().get(Environment.ENV_USER);
 		session.setPrincipal(username);
 
 		thread = new Thread(this, "SshShell");
@@ -96,6 +109,8 @@ public class SshShell implements Command, Runnable, QuitHandler {
 
 	@Override
 	public void destroy() {
+		logger.info("destroy called");
+		closed = true;
 		thread.interrupt();
 	}
 
@@ -105,14 +120,17 @@ public class SshShell implements Command, Runnable, QuitHandler {
 		context.printPrompt();
 		try {
 			for (;;) {
+				if (closed)
+					break;
 				byte b = (byte) in.read();
 				tsm.feed(b);
 			}
 		} catch (Exception e) {
-			if (!(e instanceof InterruptedException))
+			if (!(e instanceof InterruptedIOException))
 				e.printStackTrace();
 		} finally {
 			callback.onExit(0);
+			logger.info("ssh shell closed: user " + username);
 		}
 	}
 
