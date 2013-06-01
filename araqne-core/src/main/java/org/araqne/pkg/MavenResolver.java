@@ -187,8 +187,6 @@ public class MavenResolver {
 						pomStream.write(b, 0, read);
 					}
 
-					if (monitor != null)
-						monitor.writeln("");
 				} catch (Exception e) {
 					if (monitor != null && e.getMessage().contains("digest auth failed"))
 						monitor.writeln(" (auth fail)");
@@ -201,6 +199,9 @@ public class MavenResolver {
 					ensureClose(is);
 				}
 			}
+
+			if (monitor != null)
+				monitor.writeln("");
 
 			if (localJar.getAbsolutePath().replace("\\", "/").equals(jarUrl.getPath().substring(1)))
 				return localJar;
