@@ -47,10 +47,13 @@ import org.apache.log4j.PatternLayout;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.apache.sshd.SshServer;
+import org.apache.sshd.common.Channel;
 import org.apache.sshd.common.NamedFactory;
+import org.apache.sshd.common.future.CloseFuture;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.UserAuth;
 import org.apache.sshd.server.auth.UserAuthPassword;
+import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.sftp.SftpSubsystem;
 import org.araqne.account.AccountScriptFactory;
@@ -499,8 +502,15 @@ public class Araqne implements BundleActivator, SignalHandler {
 		String sshAddress = System.getProperty("araqne.ssh.address");
 
 		int port = 7022;
+		int timeout = 600000;
 		try {
 			port = Integer.parseInt((String) System.getProperty("araqne.ssh.port"));
+		} catch (Exception e) {
+			// ignore
+		}
+
+		try {
+			timeout = Integer.parseInt((String) System.getProperty("araqne.ssh.timeout"));
 		} catch (Exception e) {
 			// ignore
 		}
@@ -520,7 +530,33 @@ public class Araqne implements BundleActivator, SignalHandler {
 		namedFactories.add(new SftpSubsystem.Factory());
 		sshd.setSubsystemFactories(namedFactories);
 		sshd.setFileSystemFactory(new SshFileSystemFactory());
+		
+		sshd.getProperties().put(SshServer.IDLE_TIMEOUT, Integer.toString(timeout));
 
+		// walk-around of SshShell thread leak problem 
+		List<NamedFactory<Channel>> namedChannelFactories = new ArrayList<NamedFactory<Channel>>();
+		namedChannelFactories.add(new NamedFactory<Channel>() {
+			@Override
+			public Channel create() {
+				return new ChannelSession() {
+					@Override
+					public CloseFuture close(boolean immediately) {
+		                if (command != null) {
+		                    command.destroy();
+		                    command = null;
+		                }
+						return super.close(immediately);
+					}
+				};
+			}
+
+			@Override
+			public String getName() {
+				return "session";
+			}
+		});
+		sshd.setChannelFactories(namedChannelFactories);
+		
 		sshd.start();
 	}
 }

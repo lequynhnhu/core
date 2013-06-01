@@ -49,7 +49,7 @@ public class ShellSession {
 	}
 
 	public void printBanner() {
-		sc.getOutputStream().println(Araqne.BANNER);
+		sc.getOutputStream().println("\r" + Araqne.BANNER);
 	}
 
 	public void handleMessage(Object message) throws InterruptedException, IOException {
@@ -174,8 +174,10 @@ public class ShellSession {
 	private boolean handleEmbeddedCommands(ScriptOutputStream out, String line) throws IOException {
 		line = line.trim();
 
-		if ((line.equals("quit") || line.equals("exit")))
+		if ((line.equals("quit") || line.equals("exit"))) {
 			sc.quit();
+			return true;
+		}
 
 		// putty send only CR at ssh mode when you hit enter.
 		if (line.equals("\r") || line.equals("\r\n")) {
