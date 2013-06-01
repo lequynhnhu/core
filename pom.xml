@@ -69,8 +69,7 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<optional>true</optional>
-				<version>4.11</version>
+				<version>4.8.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
