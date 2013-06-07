@@ -46,6 +46,7 @@ public class Editor {
 	private int x = 0;
 	private int y = 0;
 	private List<String> lines;
+	private Thread inputThread;
 
 	public Editor(ScriptContext context) {
 		this.context = context;
@@ -77,8 +78,10 @@ public class Editor {
 					KeyCode c = e.getKeyCode();
 					// you should prevent additional rendering because it will
 					// conflict with screen clear routine at exit.
-					if (c == KeyCode.CTRL_C || c == KeyCode.CTRL_D)
+					if (c == KeyCode.CTRL_C || c == KeyCode.CTRL_D) {
+						inputThread.interrupt();
 						return;
+					}
 
 					int maxHeight = getMaxHeight();
 
@@ -184,6 +187,7 @@ public class Editor {
 
 			render();
 
+			inputThread = Thread.currentThread();
 			// char input loop
 			while (true) {
 				char c = context.read();
