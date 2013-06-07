@@ -67,8 +67,10 @@ public class ConsoleController {
 
 				out.print(new EraseLineCode(Option.CursorToEnd));
 				Iterator<String> i = dataList.listIterator(cursorPos);
+				StringBuilder sb = new StringBuilder();
 				while (i.hasNext())
-					out.print(i.next());
+					sb.append(i.next());
+				out.print(sb.toString());
 			}
 		} else {
 			if (character.equals("\r"))
