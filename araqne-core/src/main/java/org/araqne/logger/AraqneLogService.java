@@ -16,17 +16,16 @@
 
 package org.araqne.logger;
 
-import org.apache.felix.framework.Logger;
 import org.araqne.api.LoggerControlService;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.AraqneLoggerFactory;
 import org.slf4j.impl.StaticLoggerBinder;
 
 public class AraqneLogService implements LogService, LoggerControlService {
-	private AraqneLoggerFactory loggerFactory = (AraqneLoggerFactory) StaticLoggerBinder.getSingleton()
-			.getLoggerFactory();
+	private AraqneLoggerFactory loggerFactory = (AraqneLoggerFactory) StaticLoggerBinder.getSingleton().getLoggerFactory();
 
 	@Override
 	public boolean hasLogger(String name) {
@@ -40,26 +39,90 @@ public class AraqneLogService implements LogService, LoggerControlService {
 
 	@Override
 	public void log(int level, String message, Throwable exception) {
+		if (message.contains("A methodID cannot be associated with a method from the POJO class"))
+			level = 4;
+
 		Logger logger = (Logger) LoggerFactory.getLogger(AraqneLogService.class.getName());
-		logger.log(level, message, exception);
+		switch (level) {
+		case 1:
+			logger.error(message, exception);
+			break;
+		case 2:
+			logger.warn(message, exception);
+			break;
+		case 3:
+			logger.info(message, exception);
+			break;
+		case 4:
+			logger.debug(message, exception);
+			break;
+		}
 	}
 
 	@Override
 	public void log(int level, String message) {
+		if (message.contains("A methodID cannot be associated with a method from the POJO class"))
+			level = 4;
+
 		Logger logger = (Logger) LoggerFactory.getLogger(AraqneLogService.class.getName());
-		logger.log(level, message);
+		switch (level) {
+		case 1:
+			logger.error(message);
+			break;
+		case 2:
+			logger.warn(message);
+			break;
+		case 3:
+			logger.info(message);
+			break;
+		case 4:
+			logger.debug(message);
+			break;
+		}
 	}
 
 	@Override
 	public void log(@SuppressWarnings("rawtypes") ServiceReference sr, int level, String message, Throwable exception) {
+		if (message.contains("A methodID cannot be associated with a method from the POJO class"))
+			level = 4;
+
 		Logger logger = (Logger) LoggerFactory.getLogger(AraqneLogService.class.getName());
-		logger.log(level, message, exception);
+		switch (level) {
+		case 1:
+			logger.error(message, exception);
+			break;
+		case 2:
+			logger.warn(message, exception);
+			break;
+		case 3:
+			logger.info(message, exception);
+			break;
+		case 4:
+			logger.debug(message, exception);
+			break;
+		}
 	}
 
 	@Override
 	public void log(@SuppressWarnings("rawtypes") ServiceReference sr, int level, String message) {
+		if (message.contains("A methodID cannot be associated with a method from the POJO class"))
+			level = 4;
+
 		Logger logger = (Logger) LoggerFactory.getLogger(AraqneLogService.class.getName());
-		logger.log(level, message);
+		switch (level) {
+		case 1:
+			logger.error(message);
+			break;
+		case 2:
+			logger.warn(message);
+			break;
+		case 3:
+			logger.info(message);
+			break;
+		case 4:
+			logger.debug(message);
+			break;
+		}
 	}
 
 }
