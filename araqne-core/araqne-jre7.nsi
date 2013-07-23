@@ -164,7 +164,7 @@ FunctionEnd
 
 Function un.RemoveService
 	${If} ${RunningX64}
-		StrCpy $R0 "$INSTDIR\procrun\amd64\araqne.exe"
+		StrCpy $R0 "$INSTDIR\procrun\amd64\araqnecore.exe"
 	${Else}
 		StrCpy $R0 "$INSTDIR\procrun\araqnecore.exe"
 	${Endif}
