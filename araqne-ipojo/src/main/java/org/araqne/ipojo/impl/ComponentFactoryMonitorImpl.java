@@ -67,6 +67,7 @@ public class ComponentFactoryMonitorImpl extends ServiceTracker implements Compo
 	public void stop() {
 		validFactories.clear();
 		trackers.clear();
+		super.close();
 	}
 
 	@Override
