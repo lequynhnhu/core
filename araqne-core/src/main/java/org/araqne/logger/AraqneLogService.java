@@ -39,7 +39,8 @@ public class AraqneLogService implements LogService, LoggerControlService {
 
 	@Override
 	public void log(int level, String message, Throwable exception) {
-		if (message.contains("A methodID cannot be associated with a method from the POJO class"))
+		if (message.contains("A methodID cannot be associated with a method from the POJO class") ||
+				message.contains("The dependency is not optional, however no service object can be injected in"))
 			level = 4;
 
 		Logger logger = (Logger) LoggerFactory.getLogger(AraqneLogService.class.getName());
