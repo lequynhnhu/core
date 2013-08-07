@@ -188,7 +188,8 @@ public class MavenResolver {
 					}
 				}
 
-				if (localJar.getAbsolutePath().replace("\\", "/").equals(jarUrl.getPath().substring(1)))
+				if (localJar.getAbsolutePath().replace("\\", "/").equals(jarUrl.getPath().substring(1))
+						|| localJar.getAbsolutePath().equals(jarUrl.getPath()))
 					return localJar;
 
 				// download jar
