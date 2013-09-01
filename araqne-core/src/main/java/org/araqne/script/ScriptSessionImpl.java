@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.araqne.api.ScriptSession;
 import org.araqne.console.ConsoleHistoryManager;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,7 @@ public class ScriptSessionImpl implements ScriptSession {
 
 	private ConcurrentMap<String, Object> properties;
 	private ConsoleHistoryManager history;
+	private BundleContext bc;
 
 	static {
 		String h = "unknown";
@@ -46,7 +48,8 @@ public class ScriptSessionImpl implements ScriptSession {
 		hostname = h;
 	}
 
-	public ScriptSessionImpl(ConsoleHistoryManager history) {
+	public ScriptSessionImpl(BundleContext bc, ConsoleHistoryManager history) {
+		this.bc = bc;
 		this.properties = new ConcurrentHashMap<String, Object>();
 		this.history = history;
 	}
@@ -73,6 +76,8 @@ public class ScriptSessionImpl implements ScriptSession {
 
 	@Override
 	public Object getProperty(String key) {
+		if (key.equals("bc"))
+			return bc;
 		return properties.get(key);
 	}
 

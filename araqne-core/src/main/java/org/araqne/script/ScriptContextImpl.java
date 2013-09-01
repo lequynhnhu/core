@@ -65,7 +65,7 @@ public class ScriptContextImpl implements ScriptContext {
 		this.controller = new ConsoleController(this, new ConsoleAutoComplete(Araqne.getContext()));
 		this.history = new ConsoleHistoryManager(controller);
 		this.controller.setArrowKeyHandler(history);
-		this.session = new ScriptSessionImpl(history);
+		this.session = new ScriptSessionImpl(bc, history);
 		this.session.setProperty("dir", new File(System.getProperty("user.dir")));
 		this.quit = quit;
 	}
