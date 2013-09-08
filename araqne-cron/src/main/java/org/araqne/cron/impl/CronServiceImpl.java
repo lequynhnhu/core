@@ -158,7 +158,7 @@ public class CronServiceImpl implements CronService {
 	 *             when given instance name is not a valid string.
 	 */
 	private static Runnable getRef(BundleContext context, String instanceName) throws InvalidSyntaxException {
-		ServiceReference[] refs = context.getServiceReferences(Runnable.class.getName(), "(instance.name=" + instanceName + ")");
+		ServiceReference<?>[] refs = context.getServiceReferences(Runnable.class.getName(), "(instance.name=" + instanceName + ")");
 		if (refs == null || refs.length == 0) {
 			throw new NullPointerException();
 		}

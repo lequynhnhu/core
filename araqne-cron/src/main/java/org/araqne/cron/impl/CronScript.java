@@ -130,7 +130,7 @@ public class CronScript implements Script {
 	public void run(String[] args) {
 		String instanceName = args[0];
 
-		ServiceReference[] refs;
+		ServiceReference<?>[] refs;
 		try {
 			refs = bundleContext.getServiceReferences(Runnable.class.getName(), "(instance.name=" + instanceName + ")");
 			if (refs == null || refs.length == 0) {
@@ -161,14 +161,14 @@ public class CronScript implements Script {
 	public void runnables(String[] args) throws InvalidSyntaxException {
 		context.println("Active Runnables");
 		context.println("------------------");
-		ServiceReference[] refs;
+		ServiceReference<?>[] refs;
 		try {
 			refs = bundleContext.getServiceReferences(Runnable.class.getName(), null);
 			if (refs == null || refs.length == 0) {
 				context.println("empty list");
 				return;
 			}
-			for (ServiceReference ref : refs) {
+			for (ServiceReference<?> ref : refs) {
 				context.println(ref.getProperty("instance.name").toString());
 			}
 		} catch (InvalidSyntaxException e) {

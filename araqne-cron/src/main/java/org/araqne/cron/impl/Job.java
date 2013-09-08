@@ -15,10 +15,13 @@
  */
 package org.araqne.cron.impl;
 
+import java.lang.reflect.Method;
 import java.util.Date;
 
 import org.araqne.cron.Schedule;
 import org.osgi.framework.InvalidSyntaxException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Job class used as a component of cron scheduler
@@ -27,6 +30,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * @since 1.0.0
  */
 public class Job implements Comparable<Job>, Cloneable {
+	private final Logger logger = LoggerFactory.getLogger(Job.class);
 	public final int scheduleId;
 	public final Schedule schedule;
 	public Date date;
@@ -89,7 +93,16 @@ public class Job implements Comparable<Job>, Cloneable {
 		if (task == null) {
 			throw new NullPointerException("runnable not active");
 		}
-		
+
+		try {
+			// @since 1.8.0
+			Method method = task.getClass().getMethod("run", Schedule.class);
+			method.invoke(task, schedule);
+			return;
+		} catch (Throwable t) {
+			logger.debug("araqne cron: cannot invoke run(Schedule) method", t);
+		}
+
 		task.run();
 	}
 
@@ -126,8 +139,5 @@ public class Job implements Comparable<Job>, Cloneable {
 			return false;
 		return true;
 	}
-	
-	
-	
-	
+
 }
