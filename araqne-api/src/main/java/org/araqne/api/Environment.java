@@ -49,5 +49,9 @@ public class Environment {
 			System.setProperty("araqne.cert.dir", new File(araqneDirProp, "cert").getAbsolutePath());
 		if (System.getProperty("araqne.home.dir") == null)
 			System.setProperty("araqne.home.dir", new File(araqneDirProp, "home").getAbsolutePath());
+		if (System.getProperty("araqne.plugin.dir") == null)
+			System.setProperty("araqne.plugin.dir", new File(araqneDirProp, "plugin").getAbsolutePath());
+
+		new File(System.getProperty("araqne.plugin.dir")).mkdirs();
 	}
 }
