@@ -130,10 +130,10 @@ public class PackageManagerService implements PackageManager {
 		if (metadata == null)
 			throw new PackageNotFoundException(packageName);
 
-		PackageVersionHistory ver = selectVersion(version, metadata);
+		PackageVersionHistory ver = selectVersion(version, metadata, monitor);
 		if (ver == null)
 			throw new PackageNotFoundException(packageName);
-
+		
 		PackageDescriptor newPkg = downloadPackageDesc(metadata, ver);
 
 		// download description and download maven artifacts
@@ -179,14 +179,17 @@ public class PackageManagerService implements PackageManager {
 		}
 	}
 
-	private PackageVersionHistory selectVersion(String version, PackageMetadata metadata) {
+	private PackageVersionHistory selectVersion(String version, PackageMetadata metadata, ProgressMonitor monitor) {
 		if (version == null)
 			return metadata.getVersions().get(0);
 
 		Version v = new Version(version);
 		for (PackageVersionHistory h : metadata.getVersions())
-			if (h.getVersion().equals(v))
+			if (h.getVersion().equals(v)) {
+				if (monitor != null)
+					monitor.writeln("  -> selected version: " + h.getVersion());
 				return h;
+			}
 
 		return null;
 	}
