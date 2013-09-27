@@ -2,8 +2,10 @@ package org.json;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,14 +19,19 @@ public class JSONConverter {
 	}
 
 	private static void jsonize(Object o, JSONWriter jsonWriter) throws JSONException {
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		if (o instanceof Map) {
 			jsonWriter.object();
 
 			@SuppressWarnings("unchecked")
 			Map<String, Object> m = (HashMap<String, Object>) o;
 
-			for (String key : m.keySet())
-				jsonWriter.key(key).value(m.get(key));
+			for (String key : m.keySet()) {
+				Object val = m.get(key);
+				if (val instanceof Date)
+					val = df.format((Date) val);
+				jsonWriter.key(key).value(val);
+			}
 
 			jsonWriter.endObject();
 			return;
