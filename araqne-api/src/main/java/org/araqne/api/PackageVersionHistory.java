@@ -17,7 +17,7 @@ package org.araqne.api;
 
 import java.util.Date;
 
-public class PackageVersionHistory {
+public class PackageVersionHistory implements Comparable<PackageVersionHistory> {
 	private Version version;
 	private Date lastUpdated;
 
@@ -46,6 +46,15 @@ public class PackageVersionHistory {
 	public String toString() {
 		return String.format("PackageVersionHistory{version: %s, last updated: %s}", version,
 				lastUpdated);
+	}
+
+	@Override
+	public int compareTo(PackageVersionHistory o) {
+		if (version.equals(o.version)) {
+			return lastUpdated.compareTo(o.lastUpdated);
+		} else {
+			return version.compareTo(o.version);
+		}
 	}
 
 }

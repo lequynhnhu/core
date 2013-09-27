@@ -27,6 +27,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -133,7 +134,7 @@ public class PackageManagerService implements PackageManager {
 		PackageVersionHistory ver = selectVersion(version, metadata, monitor);
 		if (ver == null)
 			throw new PackageNotFoundException(packageName);
-		
+
 		PackageDescriptor newPkg = downloadPackageDesc(metadata, ver);
 
 		// download description and download maven artifacts
@@ -180,18 +181,24 @@ public class PackageManagerService implements PackageManager {
 	}
 
 	private PackageVersionHistory selectVersion(String version, PackageMetadata metadata, ProgressMonitor monitor) {
-		if (version == null)
-			return metadata.getVersions().get(0);
+		PackageVersionHistory selected = null;
+		if (version == null) {
+			ArrayList<PackageVersionHistory> versions = new ArrayList<PackageVersionHistory>();
+			versions.addAll(metadata.getVersions());
+			Collections.sort(versions, Collections.reverseOrder());
+			selected = versions.get(0);
+		} else {
+			Version v = new Version(version);
+			for (PackageVersionHistory h : metadata.getVersions())
+				if (h.getVersion().equals(v)) {
+					selected = h;
+				}
+		}
 
-		Version v = new Version(version);
-		for (PackageVersionHistory h : metadata.getVersions())
-			if (h.getVersion().equals(v)) {
-				if (monitor != null)
-					monitor.writeln("  -> selected version: " + h.getVersion());
-				return h;
-			}
+		if (selected != null && monitor != null)
+			monitor.writeln("  -> selected version: " + selected.getVersion());
 
-		return null;
+		return selected;
 	}
 
 	private void startBundles(PackageDescriptor pkg, ProgressMonitor monitor) {
