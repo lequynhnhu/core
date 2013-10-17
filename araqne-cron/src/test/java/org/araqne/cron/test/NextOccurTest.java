@@ -82,17 +82,19 @@ public class NextOccurTest {
 		Schedule sche10 = new Schedule.Builder("awef").build("0 0 5,28 3 *");
 		Schedule sche11 = new Schedule.Builder("awef").build("0 0 5,28 3 1");
 
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche1, date).toString(), "Thu Aug 06 01:11:00 KST 2009");
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche2, date).toString(), "Thu Aug 06 02:00:00 KST 2009");
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche3, date).toString(), "Fri Aug 07 00:00:00 KST 2009");
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche4, date).toString(), "Sun Aug 09 00:00:00 KST 2009");
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche5, date).toString(), "Fri Jan 01 00:00:00 KST 2010");
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche6, date).toString(), "Thu Aug 06 01:30:00 KST 2009");
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche7, date).toString(), "Thu Aug 06 01:17:00 KST 2009");
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche8, date).toString(), "Thu Aug 06 03:03:00 KST 2009");
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche9, date).toString(), "Fri Aug 28 00:00:00 KST 2009");
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche10, date).toString(), "Fri Mar 05 00:00:00 KST 2010");
-		assertEquals(NextOccurenceCalculator.getNextOccurence(sche11, date).toString(), "Mon Mar 01 00:00:00 KST 2010");
+		SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy", Locale.ENGLISH);
+
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche1, date)), "Thu Aug 06 01:11:00 2009");
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche2, date)), "Thu Aug 06 02:00:00 2009");
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche3, date)), "Fri Aug 07 00:00:00 2009");
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche4, date)), "Sun Aug 09 00:00:00 2009");
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche5, date)), "Fri Jan 01 00:00:00 2010");
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche6, date)), "Thu Aug 06 01:30:00 2009");
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche7, date)), "Thu Aug 06 01:17:00 2009");
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche8, date)), "Thu Aug 06 03:03:00 2009");
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche9, date)), "Fri Aug 28 00:00:00 2009");
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche10, date)), "Fri Mar 05 00:00:00 2010");
+		assertEquals(sdf.format(NextOccurenceCalculator.getNextOccurence(sche11, date)), "Mon Mar 01 00:00:00 2010");
 	}
 
 	@Test
