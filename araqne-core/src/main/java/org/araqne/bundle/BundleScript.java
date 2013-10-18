@@ -47,6 +47,7 @@ import org.araqne.pkg.ProgressMonitorImpl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 
 public class BundleScript implements Script {
 	private BundleContext bc;
@@ -318,6 +319,54 @@ public class BundleScript implements Script {
 		} catch (Exception e) {
 			context.println("failed to stop bundle " + bundleId);
 			context.println(e.getMessage());
+		}
+	}
+	
+	public void updateVersion(String[] args) {
+		try {
+			String version = null;
+			long bundleId = Long.parseLong(args[0]);
+			if (args.length > 1)
+				version = args[1];
+			
+			Bundle b = bc.getBundle(bundleId);
+			if (b == null)
+				return;
+			
+			Version oldVersion = b.getVersion();
+			manager.updateBundleVersion(bundleId, version);
+
+			b = bc.getBundle(bundleId);
+			context.printf("updated: %s -> %s\n", oldVersion, b.getVersion());
+		} catch (Exception e) {
+			context.println(e.getClass() + ": " + e.getMessage());
+			Throwable t = e;
+			while (t.getCause() != null) {
+				t = e.getCause();
+				context.println("  caused by " + t.getClass() + ": " + t.getMessage());
+			}
+		}
+	}
+	
+	@ScriptUsage(description = "replace a bundle with another bundle. USE AT YOUR OWN RISK.")
+	public void replace(String[] args) {
+		try {
+			String bundleLocation = null;
+			long bundleId = Long.parseLong(args[0]);
+			if (args.length > 1)
+				bundleLocation = args[1];
+			else
+				return;
+			
+			Bundle b = bc.getBundle(bundleId);
+			if (b == null)
+				return;
+			
+			manager.updateBundle(bundleId, bundleLocation);
+			
+			context.println("updated");
+		} catch (Exception e) {
+			context.println(e.getClass() + ": " + e.getMessage());
 		}
 	}
 

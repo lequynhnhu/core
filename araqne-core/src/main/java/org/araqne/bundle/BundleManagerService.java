@@ -17,6 +17,7 @@ package org.araqne.bundle;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -427,6 +428,47 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 		}
 	}
 
+	@Override
+	public void updateBundle(long bundleId, String bundleLocation) {
+		Bundle bundle = context.getBundle(bundleId);
+		if (bundle == null) {
+			logger.warn(String.format("bundle %d not found", bundleId));
+			throw new IllegalStateException("bundle " + bundleId + " not found");
+		}
+
+		try {
+			bundle.update(new FileInputStream(new File(new URI(bundleLocation))));
+		} catch (Exception e) {
+			throw new IllegalStateException("bundleId: " + bundleId + ", location: " + bundleLocation, e);
+		}
+	}
+
+	@Override
+	public void updateBundleVersion(long bundleId, String version) {
+		Bundle bundle = context.getBundle(bundleId);
+		if (bundle == null) {
+			logger.warn(String.format("bundle %d not found", bundleId));
+			throw new IllegalStateException("bundle " + bundleId + " not found");
+		}
+
+		MavenResolver resolver = new MavenResolver(getLocalRepository(), config.getRepositories(), null, getKeyStoreManager());
+		Version v = (version != null) ? new Version(version) : null;
+		MavenArtifact oArtifact = getArtifact(bundle);
+		MavenArtifact artifact = new MavenArtifact(oArtifact.getGroupId(), oArtifact.getArtifactId(), v);
+
+		if (isBuiltinArtifact(artifact.getGroupId(), artifact.getArtifactId()))
+			throw new IllegalStateException("provided in system bundle");
+
+		try {
+			File file = resolver.resolve(artifact);
+			String filePath = getPrefix() + file.getAbsolutePath().replace('\\', '/');
+
+			bundle.update(new FileInputStream(new File(filePath)));
+		} catch (Exception e) {
+			throw new IllegalStateException("bundleId: " + bundleId + ", version: " + version, e);
+		}
+	}
+
 	private boolean isLocalJar(Bundle bundle) {
 		File location = new File(bundle.getLocation().replace("file://", ""));
 		File araqneDownload = new File(System.getProperty("araqne.download.dir"));
@@ -595,4 +637,5 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 			return false;
 		}
 	}
+
 }

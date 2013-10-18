@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.prefs.BackingStoreException;
 
 public interface BundleManager {
 
@@ -133,6 +134,15 @@ public interface BundleManager {
 	 */
 	void updateBundle(long bundleId);
 
+	/**
+	 * Update the bundle. Refresh by PackageAdmin may be needed.
+	 * 
+	 * @param bundleId
+	 *            the bundle id
+	 * @throws BundleException
+	 */
+	void updateBundle(long bundleId, String bundleLocation);
+
 	Map<Long, BundleStatus> getBundles();
 
 	/**
@@ -171,4 +181,6 @@ public interface BundleManager {
 	List<String> getEntryPaths(long bundleId, String directory);
 
 	boolean isLocallyInstalledBundle(long bundleId);
+
+	void updateBundleVersion(long bundleId, String version);
 }
