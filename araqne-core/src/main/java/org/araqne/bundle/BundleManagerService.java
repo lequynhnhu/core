@@ -444,7 +444,7 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	}
 
 	@Override
-	public void updateBundleVersion(long bundleId, String version) {
+	public void updateBundleVersion(long bundleId, String groupId, String artifactId, String version) {
 		Bundle bundle = context.getBundle(bundleId);
 		if (bundle == null) {
 			logger.warn(String.format("bundle %d not found", bundleId));
@@ -453,8 +453,7 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 
 		MavenResolver resolver = new MavenResolver(getLocalRepository(), config.getRepositories(), null, getKeyStoreManager());
 		Version v = (version != null) ? new Version(version) : null;
-		MavenArtifact oArtifact = getArtifact(bundle);
-		MavenArtifact artifact = new MavenArtifact(oArtifact.getGroupId(), oArtifact.getArtifactId(), v);
+		MavenArtifact artifact = new MavenArtifact(groupId, artifactId, v);
 
 		if (isBuiltinArtifact(artifact.getGroupId(), artifact.getArtifactId()))
 			throw new IllegalStateException("provided in system bundle");
@@ -463,7 +462,7 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 			File file = resolver.resolve(artifact);
 			String filePath = getPrefix() + file.getAbsolutePath().replace('\\', '/');
 
-			bundle.update(new FileInputStream(new File(filePath)));
+			bundle.update(new FileInputStream(file));
 		} catch (Exception e) {
 			throw new IllegalStateException("bundleId: " + bundleId + ", version: " + version, e);
 		}

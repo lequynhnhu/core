@@ -321,20 +321,28 @@ public class BundleScript implements Script {
 			context.println(e.getMessage());
 		}
 	}
-	
+
+	@ScriptUsage(description = "update bundle version from maven repository", arguments = {
+			@ScriptArgument(name = "bundleId", type = "integer", description = "bundle id to update version"),
+			@ScriptArgument(name = "groupId", type = "string", description = "group id of existing bundle"),
+			@ScriptArgument(name = "artifactId", type = "string", description = "artifact id of existing bundle"),
+			@ScriptArgument(name = "version", type = "string", description = "version to update", optional = true),
+	})
 	public void updateVersion(String[] args) {
 		try {
 			String version = null;
 			long bundleId = Long.parseLong(args[0]);
-			if (args.length > 1)
-				version = args[1];
-			
+			String groupId = args[1];
+			String artiId = args[2];
+			if (args.length > 3)
+				version = args[3];
+
 			Bundle b = bc.getBundle(bundleId);
 			if (b == null)
 				return;
-			
+
 			Version oldVersion = b.getVersion();
-			manager.updateBundleVersion(bundleId, version);
+			manager.updateBundleVersion(bundleId, groupId, artiId, version);
 
 			b = bc.getBundle(bundleId);
 			context.printf("updated: %s -> %s\n", oldVersion, b.getVersion());
@@ -347,7 +355,7 @@ public class BundleScript implements Script {
 			}
 		}
 	}
-	
+
 	@ScriptUsage(description = "replace a bundle with another bundle. USE AT YOUR OWN RISK.")
 	public void replace(String[] args) {
 		try {
@@ -357,13 +365,13 @@ public class BundleScript implements Script {
 				bundleLocation = args[1];
 			else
 				return;
-			
+
 			Bundle b = bc.getBundle(bundleId);
 			if (b == null)
 				return;
-			
+
 			manager.updateBundle(bundleId, bundleLocation);
-			
+
 			context.println("updated");
 		} catch (Exception e) {
 			context.println(e.getClass() + ": " + e.getMessage());

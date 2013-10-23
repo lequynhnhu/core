@@ -182,5 +182,5 @@ public interface BundleManager {
 
 	boolean isLocallyInstalledBundle(long bundleId);
 
-	void updateBundleVersion(long bundleId, String version);
+	void updateBundleVersion(long bundleId, String groupId, String artifactId, String version);
 }
