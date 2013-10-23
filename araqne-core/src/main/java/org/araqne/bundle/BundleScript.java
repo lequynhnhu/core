@@ -356,7 +356,10 @@ public class BundleScript implements Script {
 		}
 	}
 
-	@ScriptUsage(description = "replace a bundle with another bundle. USE AT YOUR OWN RISK.")
+	@ScriptUsage(description = "replace a bundle with another bundle. USE AT YOUR OWN RISK.", arguments = {
+			@ScriptArgument(name = "bundle id", type = "integer", description = "bundle id to update version"),
+			@ScriptArgument(name = "file url", type = "string", description = "jar file url to update"),
+	})
 	public void replace(String[] args) {
 		try {
 			String bundleLocation = null;
