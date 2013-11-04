@@ -358,7 +358,7 @@ public class BundleScript implements Script {
 				else
 					context.print(", old timestamp: " + beforeDate + ", new timestamp: " + afterDate);
 			}
-
+			context.println();
 		} catch (Exception e) {
 			context.println(e.getClass() + ": " + e.getMessage());
 			Throwable t = e;
@@ -400,6 +400,7 @@ public class BundleScript implements Script {
 				else
 					context.print(" (old timestamp: " + beforeDate + ", new timestamp: " + afterDate + ")");
 			}
+			context.println();
 		} catch (Exception e) {
 			context.println(e.getClass() + ": " + e.getMessage());
 		}
