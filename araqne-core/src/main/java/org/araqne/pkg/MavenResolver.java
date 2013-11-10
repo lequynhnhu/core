@@ -193,6 +193,7 @@ public class MavenResolver {
 					return localJar;
 
 				// download jar
+				ensureClose(is);
 				is = download(repo, jarUrl);
 				jarStream = new FileOutputStream(localJar, false);
 

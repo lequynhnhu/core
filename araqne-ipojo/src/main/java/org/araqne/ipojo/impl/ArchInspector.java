@@ -24,7 +24,6 @@ import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.IPojoFactory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
-import org.apache.felix.ipojo.metadata.Element;
 import org.araqne.api.ScriptOutputStream;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;

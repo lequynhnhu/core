@@ -156,7 +156,7 @@ class FileConfig implements Config {
 			return n;
 
 		} else if (doc.getClass().isArray()) {
-			Class c = doc.getClass().getComponentType();
+			Class<?> c = doc.getClass().getComponentType();
 			if (c == byte.class) {
 				byte[] arr = (byte[]) doc;
 				byte[] n = new byte[arr.length];

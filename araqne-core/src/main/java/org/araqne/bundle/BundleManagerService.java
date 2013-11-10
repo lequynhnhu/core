@@ -35,8 +35,6 @@ import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.araqne.api.BundleManager;
 import org.araqne.api.BundleRepository;
@@ -185,7 +183,9 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.araqne.bundle.BundleManager#addRemoteRepository(java.lang.String, java.net.URL)
+	 * @see
+	 * org.araqne.bundle.BundleManager#addRemoteRepository(java.lang.String,
+	 * java.net.URL)
 	 */
 	@Override
 	public void addRemoteRepository(String alias, URL url) {
@@ -195,7 +195,8 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.araqne.bundle.BundleManager#addSecureRemoteRepository(java.lang .String, java.net.URL, java.lang.String, java.lang.String)
+	 * @see org.araqne.bundle.BundleManager#addSecureRemoteRepository(java.lang
+	 * .String, java.net.URL, java.lang.String, java.lang.String)
 	 */
 	@Override
 	public void addSecureRemoteRepository(String alias, URL url, String trustStoreAlias, String keyStoreAlias) {
@@ -208,7 +209,8 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.araqne.bundle.BundleManager#removeRemoteRepository(java.lang. String)
+	 * @see org.araqne.bundle.BundleManager#removeRemoteRepository(java.lang.
+	 * String)
 	 */
 	@Override
 	public void removeRemoteRepository(String alias) {
@@ -233,8 +235,8 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.araqne.bundle.BundleManager#installBundle(org.araqne.pkg. ProgressMonitor, java.lang.String, java.lang.String,
-	 * java.lang.String)
+	 * @see org.araqne.bundle.BundleManager#installBundle(org.araqne.pkg.
+	 * ProgressMonitor, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
 	public long installBundle(ProgressMonitor monitor, String groupId, String artifactId, String version)
