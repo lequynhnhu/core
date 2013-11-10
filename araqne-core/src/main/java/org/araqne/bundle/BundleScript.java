@@ -329,6 +329,7 @@ public class BundleScript implements Script {
 			@ScriptArgument(name = "version", type = "string", description = "version to update", optional = true),
 	})
 	public void updateVersion(String[] args) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		try {
 			String version = null;
 			long bundleId = Long.parseLong(args[0]);
@@ -342,10 +343,22 @@ public class BundleScript implements Script {
 				return;
 
 			Version oldVersion = b.getVersion();
+			
+			String before = (String) b.getHeaders().get("Bnd-LastModified");
 			manager.updateBundleVersion(bundleId, groupId, artiId, version);
+			String after = (String) b.getHeaders().get("Bnd-LastModified");
 
-			b = bc.getBundle(bundleId);
-			context.printf("updated: %s -> %s\n", oldVersion, b.getVersion());
+			context.printf("bundle " + bundleId + " updated: %s -> %s", oldVersion, b.getVersion());
+
+			if (before != null && after != null) {
+				String beforeDate = dateFormat.format(new Date(Long.parseLong(before)));
+				String afterDate = dateFormat.format(new Date(Long.parseLong(after)));
+				if (beforeDate.equals(afterDate))
+					context.print(" (same build timestamp)");
+				else
+					context.print(", old timestamp: " + beforeDate + ", new timestamp: " + afterDate);
+			}
+			context.println();
 		} catch (Exception e) {
 			context.println(e.getClass() + ": " + e.getMessage());
 			Throwable t = e;
@@ -361,6 +374,7 @@ public class BundleScript implements Script {
 			@ScriptArgument(name = "file url", type = "string", description = "jar file url to update"),
 	})
 	public void replace(String[] args) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		try {
 			String bundleLocation = null;
 			long bundleId = Long.parseLong(args[0]);
@@ -373,9 +387,20 @@ public class BundleScript implements Script {
 			if (b == null)
 				return;
 
+			String before = (String) b.getHeaders().get("Bnd-LastModified");
 			manager.updateBundle(bundleId, bundleLocation);
+			String after = (String) b.getHeaders().get("Bnd-LastModified");
 
-			context.println("updated");
+			context.printf("bundle " + bundleId + " replaced: " + bundleLocation);
+			if (before != null && after != null) {
+				String beforeDate = dateFormat.format(new Date(Long.parseLong(before)));
+				String afterDate = dateFormat.format(new Date(Long.parseLong(after)));
+				if (beforeDate.equals(afterDate))
+					context.print(" (same build timestamp)");
+				else
+					context.print(" (old timestamp: " + beforeDate + ", new timestamp: " + afterDate + ")");
+			}
+			context.println();
 		} catch (Exception e) {
 			context.println(e.getClass() + ": " + e.getMessage());
 		}
