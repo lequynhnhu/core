@@ -27,6 +27,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Marker;
 import org.slf4j.helpers.MessageFormatter;
+import org.slf4j.impl.StaticMDCBinder.AraqneMDCAdapter;
 
 public class AraqneLogger extends org.apache.felix.framework.Logger implements org.slf4j.Logger, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -267,7 +268,11 @@ public class AraqneLogger extends org.apache.felix.framework.Logger implements o
 			return "";
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			t.printStackTrace(new PrintStream(out));
+			PrintStream s = new PrintStream(out);
+			t.printStackTrace(s);
+			if (AraqneMDCAdapter.diagInfo != null) {
+				s.println("araqne-diag-info: " + AraqneMDCAdapter.diagInfo);
+			}
 			out.flush();
 			return new String(out.toByteArray());
 		} catch (Exception e) {
