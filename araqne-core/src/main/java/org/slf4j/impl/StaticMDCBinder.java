@@ -15,51 +15,20 @@
  */
 package org.slf4j.impl;
 
-import java.util.Map;
-
+import org.slf4j.helpers.NOPMakerAdapter;
 import org.slf4j.spi.MDCAdapter;
 
 public class StaticMDCBinder {
 	public static final StaticMDCBinder SINGLETON = new StaticMDCBinder();
-
-	public static class AraqneMDCAdapter extends Log4jMDCAdapter {
-		public static String diagInfo = null;
-
-		@Override
-		public void put(String key, String val) {
-			super.put(key, val);
-			if (key.equals("araqne-diag-info"))
-				diagInfo = val;
-		}
-
-		@Override
-		public void remove(String key) {
-			super.remove(key);
-			if (key.equals("araqne-diag-info"))
-				diagInfo = null;
-		}
-
-		@Override
-		public void clear() {
-			super.clear();
-			diagInfo = null;
-		}
-
-		@Override
-		public void setContextMap(Map contextMap) {
-			super.setContextMap(contextMap);
-			diagInfo = (String) contextMap.get("araqne-diag-info");
-		}
-	}
-
+	
 	private StaticMDCBinder() {
 	}
-
+	
 	public MDCAdapter getMDCA() {
-		return new AraqneMDCAdapter();
+		return new NOPMakerAdapter();
 	}
-
+	
 	public String getMDCAdapterClassStr() {
-		return Log4jMDCAdapter.class.getName();
+		return NOPMakerAdapter.class.getName();
 	}
 }
