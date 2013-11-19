@@ -126,7 +126,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<Main-Class>org.araqne.main.Araqne</Main-Class>
+							<mainClass>org.araqne.main.Araqne</mainClass>
 						</manifest>
 						<manifestEntries>
 							<Premain-Class>org.araqne.main.Araqne</Premain-Class>
