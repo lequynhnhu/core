@@ -81,10 +81,15 @@ public class CronScript implements Script {
 			@ScriptArgument(name = "day_of_month", type = "string", description = "(1 - 31)"),
 			@ScriptArgument(name = "month", type = "string", description = "(1 - 12)"),
 			@ScriptArgument(name = "day_of_week", type = "string", description = "(0 - 6) (Sunday=0)"),
-			@ScriptArgument(name = "task", type = "string", description = "Runnable instance name") })
+			@ScriptArgument(name = "task", type = "string", description = "Runnable instance name"),
+			@ScriptArgument(name = "tag", type = "string", description = "Schedule tag", optional = true) })
 	public void register(String[] args) {
 		try {
-			Schedule.Builder builder = new Schedule.Builder(args[5]);
+			Schedule.Builder builder = null;
+			if (args.length > 6)
+				builder = new Schedule.Builder(args[5], args[6]);
+			else
+				builder = new Schedule.Builder(args[5]);
 			builder.set(CronField.Type.MINUTE, args[0]);
 			builder.set(CronField.Type.HOUR, args[1]);
 			builder.set(CronField.Type.DAY_OF_MONTH, args[2]);
@@ -118,9 +123,11 @@ public class CronScript implements Script {
 		context.println("SYNTAX:");
 		context.println("* * * * * Runnable instance.name\n\r" + "- - - - -\n\r" + "| | | | |\n\r"
 				+ "| | | | +----- day of week (0 - 6) (Sunday=0)\n\r" + "| | | +------- month (1 - 12)\n\r"
-				+ "| | +--------- day of month (1 - 31)\n\r" + "| +----------- hour (0 - 23)\n\r" + "+------------- min (0 - 59)\n\r");
+				+ "| | +--------- day of month (1 - 31)\n\r" + "| +----------- hour (0 - 23)\n\r"
+				+ "+------------- min (0 - 59)\n\r");
 		context.println("EXAMPLES: \n\r" + "Run once a year                       |   0 0 1 1 * \n\r"
-				+ "Run once a week                       |   0 0 * * 0 \n\r" + "Run every five minute                 | */5 * * * * \n\r"
+				+ "Run once a week                       |   0 0 * * 0 \n\r"
+				+ "Run every five minute                 | */5 * * * * \n\r"
 				+ "Run once a day from monday to friday  |   0 0 * * 1-5 \n\r"
 				+ "Run once a day on saturday and sunday |   0 0 * * 0,6 \n\r");
 

@@ -68,6 +68,7 @@ public class CronConfig {
 		info.dayOfMonth = schedule.get(CronField.Type.DAY_OF_MONTH).toString();
 		info.month = schedule.get(CronField.Type.MONTH).toString();
 		info.dayOfWeek = schedule.get(CronField.Type.DAY_OF_WEEK).toString();
+		info.tag = schedule.getTag();
 		db.add(info);
 
 		return info.id;
@@ -94,7 +95,7 @@ public class CronConfig {
 	public Map<Integer, Schedule> getEntries() throws ParseException {
 		Map<Integer, Schedule> map = new HashMap<Integer, Schedule>();
 		for (ScheduleInfo schedule : db.findAll(ScheduleInfo.class).getDocuments(ScheduleInfo.class)) {
-			Schedule.Builder builder = new Schedule.Builder(schedule.task);
+			Schedule.Builder builder = new Schedule.Builder(schedule.task, schedule.tag);
 			builder.set(CronField.Type.MINUTE, schedule.minute);
 			builder.set(CronField.Type.HOUR, schedule.hour);
 			builder.set(CronField.Type.DAY_OF_MONTH, schedule.dayOfMonth);
@@ -108,6 +109,7 @@ public class CronConfig {
 	@CollectionName("schedule")
 	private static class ScheduleInfo {
 		private int id;
+		private Object tag;
 		private String task;
 		private String minute;
 		private String hour;

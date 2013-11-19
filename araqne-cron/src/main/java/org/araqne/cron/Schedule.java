@@ -122,7 +122,8 @@ public final class Schedule {
 		}
 
 		/**
-		 * create new builder object. default scheduling rule is "* * * * *"(minutely).
+		 * create new builder object. default scheduling rule is
+		 * "* * * * *"(minutely).
 		 */
 		public Builder(String taskName, Object tag) {
 			this.map = new HashMap<String, CronField>();
@@ -140,9 +141,12 @@ public final class Schedule {
 		}
 
 		/**
-		 * Set cron field with given expression. Following expressions are supported. 1. comma(',') as list. e.g:"1,3,4,8" (space inside the
-		 * list must not be used) 2. dash('-') as range. e.g:"1-6", which means 1 to 6 3. asterisk('*') as wild. e.g:"*", which means every~
-		 * 4. slash('/') as interval. e.g:"* /5" which means every five~ (without whitespace)
+		 * Set cron field with given expression. Following expressions are
+		 * supported. 1. comma(',') as list. e.g:"1,3,4,8" (space inside the
+		 * list must not be used) 2. dash('-') as range. e.g:"1-6", which means
+		 * 1 to 6 3. asterisk('*') as wild. e.g:"*", which means every~ 4.
+		 * slash('/') as interval. e.g:"* /5" which means every five~ (without
+		 * whitespace)
 		 */
 		public Builder set(CronField.Type type, String exp) throws ParseException {
 			this.map.put(type.toString(), new CronField(type, exp));
@@ -150,15 +154,18 @@ public final class Schedule {
 		}
 
 		/**
-		 * returns schedule object representing scheduling rule of current build object. e.g. new
-		 * Schedule.Builder("test").set(CronField.Type.Minute,"5").build(); represents schedule of "5 * * * * / test"
+		 * returns schedule object representing scheduling rule of current build
+		 * object. e.g. new
+		 * Schedule.Builder("test").set(CronField.Type.Minute,"5").build();
+		 * represents schedule of "5 * * * * / test"
 		 */
 		public Schedule build() {
 			return new Schedule(this);
 		}
 
 		/**
-		 * returns schedule object representing scheduling rule of given expression. cron fields previously set by set() method are ignored.
+		 * returns schedule object representing scheduling rule of given
+		 * expression. cron fields previously set by set() method are ignored.
 		 */
 		public Schedule build(String exp) throws Exception {
 			String[] splited = exp.split(" ");
