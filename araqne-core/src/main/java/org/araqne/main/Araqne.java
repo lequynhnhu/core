@@ -76,6 +76,7 @@ import org.araqne.cron.impl.CronScriptFactory;
 import org.araqne.cron.impl.CronServiceImpl;
 import org.araqne.instrumentation.InstrumentationServiceImpl;
 import org.araqne.keystore.KeyStoreScriptFactory;
+import org.araqne.logger.AraqneFileAppender;
 import org.araqne.logger.AraqneLogService;
 import org.araqne.logger.LogCleaner;
 import org.araqne.logger.LoggerScriptFactory;
@@ -488,7 +489,9 @@ public class Araqne implements BundleActivator, SignalHandler {
 			rootLogger.setLevel(Level.DEBUG);
 			PatternLayout layout = new PatternLayout("[%d] %5p (%c{1}) - %m%n");
 			rootLogger.addAppender(new ConsoleAppender(layout));
-			rootLogger.addAppender(new DailyRollingFileAppender(layout, logPath, ".yyyy-MM-dd"));
+			// rootLogger.addAppender(new DailyRollingFileAppender(layout,
+			// logPath, ".yyyy-MM-dd"));
+			rootLogger.addAppender(new AraqneFileAppender(layout, logPath, ".yyyy-MM-dd"));
 
 			logCleaner = new Thread(new LogCleaner(), "Araqne Log Cleaner");
 			logCleaner.start();
@@ -530,10 +533,10 @@ public class Araqne implements BundleActivator, SignalHandler {
 		namedFactories.add(new SftpSubsystem.Factory());
 		sshd.setSubsystemFactories(namedFactories);
 		sshd.setFileSystemFactory(new SshFileSystemFactory());
-		
+
 		sshd.getProperties().put(SshServer.IDLE_TIMEOUT, Integer.toString(timeout));
 
-		// walk-around of SshShell thread leak problem 
+		// walk-around of SshShell thread leak problem
 		List<NamedFactory<Channel>> namedChannelFactories = new ArrayList<NamedFactory<Channel>>();
 		namedChannelFactories.add(new NamedFactory<Channel>() {
 			@Override
@@ -541,10 +544,10 @@ public class Araqne implements BundleActivator, SignalHandler {
 				return new ChannelSession() {
 					@Override
 					public CloseFuture close(boolean immediately) {
-		                if (command != null) {
-		                    command.destroy();
-		                    command = null;
-		                }
+						if (command != null) {
+							command.destroy();
+							command = null;
+						}
 						return super.close(immediately);
 					}
 				};
@@ -556,7 +559,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 			}
 		});
 		sshd.setChannelFactories(namedChannelFactories);
-		
+
 		sshd.start();
 	}
 }
