@@ -165,9 +165,57 @@ class ChangeLog implements CommitLog {
 				return EncodingRule.decodeInt(bb);
 			} else {
 				// parse map value
-				bb.get();
-				long l = EncodingRule.decodeRawNumber(bb);
-				bb.position((int) (bb.position() + l));
+				byte type = bb.get();
+				switch(type) {
+				case EncodingRule.NULL_TYPE:
+					break;
+				case EncodingRule.BOOLEAN_TYPE:
+					bb.get();
+					break;
+				case EncodingRule.INT16_TYPE:
+					bb.position((int) (bb.position() + 2));
+					break;
+				case EncodingRule.INT32_TYPE:
+					bb.position((int) (bb.position() + 4));
+					break;
+				case EncodingRule.INT64_TYPE:
+					bb.position((int) (bb.position() + 8));
+					break;
+				case EncodingRule.DATE_TYPE:
+					bb.position((int) (bb.position() + 8));
+					break;
+				case EncodingRule.IP4_TYPE:
+					bb.position((int) (bb.position() + 4));
+					break;
+				case EncodingRule.IP6_TYPE:
+					bb.position((int) (bb.position() + 16));
+					break;
+				case EncodingRule.ZINT16_TYPE:
+					bb.position((int) (bb.position() + 2));
+					break;
+				case EncodingRule.ZINT32_TYPE:
+					bb.position((int) (bb.position() + 4));
+					break;
+				case EncodingRule.ZINT64_TYPE:
+					bb.position((int) (bb.position() + 8));
+					break;
+				case EncodingRule.FLOAT_TYPE:
+					bb.position((int) (bb.position() + 4));
+					break;
+				case EncodingRule.DOUBLE_TYPE:
+					bb.position((int) (bb.position() + 8));
+					break;
+					
+				case EncodingRule.BLOB_TYPE:
+				case EncodingRule.MAP_TYPE:
+				case EncodingRule.STRING_TYPE:
+				case EncodingRule.ARRAY_TYPE:
+					long l = EncodingRule.decodeRawNumber(bb);
+					bb.position((int) (bb.position() + l));
+					break;
+				default:
+					throw new IllegalStateException("unexpected type: " + type);
+				}
 			}
 		}
 	}
