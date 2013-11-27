@@ -630,8 +630,8 @@ public class PackageManagerService implements PackageManager {
 			ServiceReference<?> ref = bc.getServiceReference(KeyStoreManager.class.getName());
 			KeyStoreManager keyman = (KeyStoreManager) bc.getService(ref);
 			try {
-				TrustManagerFactory tmf = keyman.getTrustManagerFactory(repo.getTrustStoreAlias(), "SunX509");
-				KeyManagerFactory kmf = keyman.getKeyManagerFactory(repo.getKeyStoreAlias(), "SunX509");
+				TrustManagerFactory tmf = keyman.getTrustManagerFactory(repo.getTrustStoreAlias(), TrustManagerFactory.getDefaultAlgorithm());
+				KeyManagerFactory kmf = keyman.getKeyManagerFactory(repo.getKeyStoreAlias(), KeyManagerFactory.getDefaultAlgorithm());
 				HttpWagon.download(url, tmf, kmf);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
@@ -661,8 +661,8 @@ public class PackageManagerService implements PackageManager {
 			ServiceReference<?> ref = bc.getServiceReference(KeyStoreManager.class.getName());
 			KeyStoreManager keyman = (KeyStoreManager) bc.getService(ref);
 			try {
-				TrustManagerFactory tmf = keyman.getTrustManagerFactory(repo.getTrustStoreAlias(), "SunX509");
-				KeyManagerFactory kmf = keyman.getKeyManagerFactory(repo.getKeyStoreAlias(), "SunX509");
+				TrustManagerFactory tmf = keyman.getTrustManagerFactory(repo.getTrustStoreAlias(), TrustManagerFactory.getDefaultAlgorithm());
+				KeyManagerFactory kmf = keyman.getKeyManagerFactory(repo.getKeyStoreAlias(), KeyManagerFactory.getDefaultAlgorithm());
 				HttpWagon.download(url, tmf, kmf);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();

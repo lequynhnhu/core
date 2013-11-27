@@ -251,8 +251,8 @@ public class MavenResolver {
 				String trustStoreAlias = repository.getTrustStoreAlias();
 				String keyStoreAlias = repository.getKeyStoreAlias();
 
-				TrustManagerFactory tmf = keyStoreManager.getTrustManagerFactory(trustStoreAlias, "SunX509");
-				KeyManagerFactory kmf = keyStoreManager.getKeyManagerFactory(keyStoreAlias, "SunX509");
+				TrustManagerFactory tmf = keyStoreManager.getTrustManagerFactory(trustStoreAlias, TrustManagerFactory.getDefaultAlgorithm());
+				KeyManagerFactory kmf = keyStoreManager.getKeyManagerFactory(keyStoreAlias, KeyManagerFactory.getDefaultAlgorithm());
 
 				return HttpWagon.openDownloadStream(url, tmf, kmf);
 			} catch (NoSuchAlgorithmException e) {
