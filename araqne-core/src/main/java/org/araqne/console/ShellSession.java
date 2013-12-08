@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.araqne.console;
+package org.araqne.console;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -125,6 +125,7 @@ public class ShellSession {
 				AccountManager accountManager = sc.getAccountManager();
 				if (accountManager.verifyPassword(name, input)) {
 					setPrincipal(name);
+					controller.setAutoCompletion(true);
 					sc.turnEchoOn();
 					out.print("\r\n");
 

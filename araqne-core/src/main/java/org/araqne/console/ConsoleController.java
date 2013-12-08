@@ -36,6 +36,7 @@ public class ConsoleController {
 	private boolean hasLine;
 	private TelnetArrowKeyHandler arrowKeyHandler;
 	private ConsoleAutoComplete autoComplete;
+	private boolean autoCompletion;
 
 	private int cursorPos;
 
@@ -44,6 +45,10 @@ public class ConsoleController {
 		dataList = new LinkedList<String>();
 		setCursorPos(0);
 		this.autoComplete = autoComplete;
+	}
+
+	public void setAutoCompletion(boolean autoCompletion) {
+		this.autoCompletion = autoCompletion;
 	}
 
 	public void addCharacter(String character) {
@@ -57,7 +62,9 @@ public class ConsoleController {
 			}
 		} else if (character.equals("\t")) {
 			String input = peekLine();
-			doAutoCompletion(input);
+
+			if (autoCompletion)
+				doAutoCompletion(input);
 		} else if (character.equals("\n") || character.equals("\r")) {
 			hasLine = true;
 

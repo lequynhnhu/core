@@ -88,20 +88,21 @@ public class SshShell implements Command, Runnable, QuitHandler {
 	public void start(Environment env) throws IOException {
 		int width = Integer.parseInt(env.getEnv().get(Environment.ENV_COLUMNS));
 		int height = Integer.parseInt(env.getEnv().get(Environment.ENV_LINES));
-		
+
 		context.setWindowSize(width, height);
-		
+
 		env.addSignalListener(new SignalListener() {
 			@Override
 			public void signal(Signal signal) {
 				logger.info(signal.toString());
 			}
 		});
-		
+
 		env.getPtyModes().put(PtyMode.ONOCR, 1);
 
 		username = env.getEnv().get(Environment.ENV_USER);
 		session.setPrincipal(username);
+		context.getController().setAutoCompletion(true);
 
 		thread = new Thread(this, "SshShell");
 		thread.start();
