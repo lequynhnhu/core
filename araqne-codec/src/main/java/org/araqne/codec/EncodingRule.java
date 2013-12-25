@@ -580,10 +580,38 @@ public class EncodingRule {
 
 		while (length > 0) {
 			int before = bb.remaining();
-			String key = decodeString(bb);
-			Object value = decode(bb, cc);
-			int after = bb.remaining();
 
+			// parse key
+			byte ktype = bb.get();
+			if (ktype != STRING_TYPE)
+				throw new TypeMismatchException(STRING_TYPE, type, bb.position() - 1);
+
+			int klength = (int) decodeRawNumber(bb);
+			
+			int oldLimit = bb.limit();
+			int advance = bb.position() + klength;
+			bb.limit(advance);
+
+			String key = utf8.decode(bb).toString();
+			bb.limit(oldLimit);
+
+			// parse value
+			Object value = null;
+			if (bb.get(advance) == STRING_TYPE) {
+				bb.get();
+				klength = (int) decodeRawNumber(bb);
+
+				oldLimit = bb.limit();
+				advance = bb.position() + klength;
+				bb.limit(advance);
+
+				value = utf8.decode(bb).toString();
+				bb.limit(oldLimit);
+			} else {
+				value = decode(bb, cc);
+			}
+
+			int after = bb.remaining();
 			m.put(key, value);
 			length -= before - after;
 		}
