@@ -74,7 +74,10 @@ public class Job implements Comparable<Job>, Cloneable {
 	}
 
 	public String toString() {
-		return String.format("[%3d] %15s / %8s", this.scheduleId, this.date, this.schedule.getTaskName());
+		String tag = "";
+		if (schedule.getTag() != null)
+			tag = ", tag " + schedule.getTag();
+		return String.format("[%3d] %15s / %8s%s", this.scheduleId, this.date, this.schedule.getTaskName(), tag);
 	}
 
 	@Override
