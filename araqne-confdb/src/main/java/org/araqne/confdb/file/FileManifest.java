@@ -230,13 +230,16 @@ class FileManifest implements Manifest {
 		return bb.array();
 	}
 
-	public static FileManifest deserialize(byte[] b) {
+	public static FileManifest deserialize(byte[] b) throws IOException {
 		return deserialize(b, false);
 	}
 
-	public static FileManifest deserialize(byte[] b, boolean noConfigs) {
+	public static FileManifest deserialize(byte[] b, boolean noConfigs) throws IOException {
 		ByteBuffer bb = ByteBuffer.wrap(b);
 		Object doc = EncodingRule.decode(bb, new FileManifestCodec());
+		if (doc == null)
+			throw new IOException("manifest-broken");
+
 		if (doc instanceof FileManifest)
 			return (FileManifest) doc;
 

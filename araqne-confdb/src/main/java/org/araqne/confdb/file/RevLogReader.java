@@ -26,7 +26,7 @@ import java.util.ListIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class RevLogReader {
+public class RevLogReader {
 	private static final byte[] MAGIC_STRING = "KRAKEN_CONFDB".getBytes();
 	private static final int REV_LOG_SIZE = 34;
 

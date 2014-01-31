@@ -455,6 +455,9 @@ public class FileConfigDatabase implements ConfigDatabase {
 		} catch (FileNotFoundException e) {
 			return new FileManifest();
 		} catch (IOException e) {
+			if (e.getMessage().equals("manifest-broken"))
+				throw new IllegalStateException("confdb manifest is corrupted at '" + dbName + "' database");
+
 			throw new IllegalStateException(e);
 		} finally {
 			if (reader != null)
