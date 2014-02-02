@@ -23,12 +23,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TelnetHandler extends IoHandlerAdapter {
-	final Logger logger = LoggerFactory
-			.getLogger(TelnetHandler.class.getName());
+	final Logger logger = LoggerFactory.getLogger(TelnetHandler.class.getName());
 	private BundleContext bc;
 
 	public TelnetHandler(BundleContext bc) {
 		this.bc = bc;
+
 	}
 
 	public void sessionOpened(IoSession session) throws Exception {
@@ -37,10 +37,8 @@ public class TelnetHandler extends IoHandlerAdapter {
 		session.setAttribute("session", shellSession);
 
 		logger.info("telnet shell opened from: " + session.getRemoteAddress());
-		session.write(new TelnetOptionControl(TelnetOptionMessageType.WILL,
-				TelnetOptionCode.Echo));
-		session.write(new TelnetOptionControl(TelnetOptionMessageType.WILL,
-				TelnetOptionCode.SuppressGoAhead));
+		session.write(new TelnetOptionControl(TelnetOptionMessageType.WILL, TelnetOptionCode.Echo));
+		session.write(new TelnetOptionControl(TelnetOptionMessageType.WILL, TelnetOptionCode.SuppressGoAhead));
 		session.write("login as: ");
 	}
 
@@ -50,8 +48,7 @@ public class TelnetHandler extends IoHandlerAdapter {
 	}
 
 	private ShellSession getShellSession(IoSession session) {
-		ShellSession shellSession = (ShellSession) session
-				.getAttribute("session");
+		ShellSession shellSession = (ShellSession) session.getAttribute("session");
 		return shellSession;
 	}
 
@@ -62,14 +59,12 @@ public class TelnetHandler extends IoHandlerAdapter {
 		return context;
 	}
 
-	public void exceptionCaught(IoSession session, Throwable cause)
-			throws Exception {
+	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
 		if (logger.isTraceEnabled())
 			logger.trace("exception detail", cause);
 	}
 
-	public void messageReceived(IoSession session, Object message)
-			throws Exception {
+	public void messageReceived(IoSession session, Object message) throws Exception {
 		try {
 			ShellSession shellSession = getShellSession(session);
 			shellSession.handleMessage(message);

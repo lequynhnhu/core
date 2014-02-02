@@ -20,13 +20,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.araqne.api.AccountManager;
+import org.araqne.api.BannerService;
 import org.araqne.api.FunctionKeyEvent;
+import org.araqne.api.FunctionKeyEvent.KeyCode;
 import org.araqne.api.ScriptContext;
 import org.araqne.api.ScriptOutputStream;
 import org.araqne.api.ScriptSession;
-import org.araqne.api.FunctionKeyEvent.KeyCode;
 import org.araqne.main.Araqne;
 import org.araqne.script.ScriptContextImpl;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +37,7 @@ public class ShellSession {
 	public static final String KRAKEN_PROMPT = "araqne> ";
 
 	final Logger logger = LoggerFactory.getLogger(ShellSession.class.getName());
+	private BannerService bannerService;
 
 	private Map<String, Object> attributes;
 	private ScriptContextImpl sc;
@@ -42,6 +46,10 @@ public class ShellSession {
 	public ShellSession(ScriptContextImpl scriptContext) {
 		this.attributes = new HashMap<String, Object>();
 		this.sc = scriptContext;
+
+		BundleContext bc = Araqne.getContext();
+		ServiceReference<BannerService> ref = bc.getServiceReference(BannerService.class);
+		this.bannerService = bc.getService(ref);
 	}
 
 	public ScriptContext getScriptContext() {
@@ -49,7 +57,8 @@ public class ShellSession {
 	}
 
 	public void printBanner() {
-		sc.getOutputStream().println("\r" + Araqne.BANNER);
+		String banner = bannerService.getBanner();
+		sc.getOutputStream().println("\r" + banner);
 	}
 
 	public void handleMessage(Object message) throws InterruptedException, IOException {

@@ -33,15 +33,11 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.prefs.impl.PreferencesManager;
 import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.DailyRollingFileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
@@ -57,6 +53,7 @@ import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.sftp.SftpSubsystem;
 import org.araqne.account.AccountScriptFactory;
+import org.araqne.api.BannerService;
 import org.araqne.api.Environment;
 import org.araqne.api.InstrumentationService;
 import org.araqne.api.LoggerControlService;
@@ -69,6 +66,7 @@ import org.araqne.bundle.BundleScript;
 import org.araqne.bundle.BundleScriptFactory;
 import org.araqne.confdb.ConfigService;
 import org.araqne.confdb.file.FileConfigService;
+import org.araqne.console.DefaultBannerService;
 import org.araqne.console.TelnetCodecFactory;
 import org.araqne.console.TelnetHandler;
 import org.araqne.cron.CronService;
@@ -116,8 +114,6 @@ import sun.misc.SignalHandler;
  */
 @SuppressWarnings("restriction")
 public class Araqne implements BundleActivator, SignalHandler {
-	public static String BANNER = "Araqne";
-
 	private static BundleContext context = null;
 	public static Instrumentation instrumentation = null;
 	private Logger logger = null;
@@ -128,6 +124,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 	private ConfigService conf;
 	private AuthService auth;
 	private CronService cron;
+	private BannerService banner;
 
 	private static boolean serviceMode = false;
 
@@ -292,7 +289,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 	 * 
 	 * @throws IOException
 	 */
-	private void openConsolePort() throws IOException {
+	private void startTelnetServer() throws IOException {
 		InetAddress address = getConsoleBindAddress();
 		int port = getConsolePortNumber();
 		InetSocketAddress bindSocketAddress = new InetSocketAddress(address, port);
@@ -302,7 +299,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 		acceptor.setHandler(new TelnetHandler(context));
 		acceptor.setReuseAddress(true);
 		acceptor.bind(bindSocketAddress);
-		logger.info("Console " + bindSocketAddress + " opened.");
+		logger.info("Telnet " + bindSocketAddress + " opened.");
 	}
 
 	/**
@@ -354,31 +351,19 @@ public class Araqne implements BundleActivator, SignalHandler {
 
 		logger.info("Booting Araqne.");
 		startLogging();
-		setBanner();
 
 		prefsManager = new PreferencesManager();
 		prefsManager.start(context);
 		conf = new FileConfigService();
 		auth = new DefaultAuthService(context, conf);
 		cron = new CronServiceImpl(context, conf);
+		banner = new DefaultBannerService();
 
 		registerScripts();
-		registerInstrumentation();
-		openConsolePort();
+		registerServices();
+		startTelnetServer();
 		startSshServer();
 		logger.info("Araqne started.");
-	}
-
-	private void setBanner() throws IOException {
-		try {
-			String jarFileName = System.getProperty("java.class.path").split(System.getProperty("path.separator"))[0];
-			JarFile jar = new JarFile(jarFileName);
-			Manifest mf = jar.getManifest();
-			Attributes attrs = mf.getMainAttributes();
-			BANNER = "Araqne (version " + attrs.getValue("Araqne-Version") + ")";
-		} catch (FileNotFoundException e) {
-			BANNER = "Araqne (Debug mode)";
-		}
 	}
 
 	/**
@@ -431,7 +416,8 @@ public class Araqne implements BundleActivator, SignalHandler {
 		context.registerService(ScriptFactory.class.getName(), scriptFactory, props);
 	}
 
-	private void registerInstrumentation() {
+	private void registerServices() {
+		context.registerService(BannerService.class.getName(), banner, null);
 		context.registerService(InstrumentationService.class.getName(), new InstrumentationServiceImpl(), null);
 		context.registerService(CronService.class.getName(), cron, null);
 	}
