@@ -5,3 +5,4 @@ target
 bin
 *.pyc
 *.versionsBackup
+git.properties
