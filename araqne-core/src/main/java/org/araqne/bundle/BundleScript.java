@@ -15,10 +15,13 @@
  */
 package org.araqne.bundle;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -28,6 +31,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -632,6 +636,62 @@ public class BundleScript implements Script {
 				context.printf("[%3d] %-41s %s\t  %s\n", key, status.getSymbolicName(), status.getVersion(),
 						buildTimestamp == null ? "N/A" : dateFormat.format(buildTimestamp));
 			}
+		}
+	}
+
+	public void buildInfos(String[] args) {
+		int bundleId = -1;
+		String filterText = null;
+
+		if (args.length != 0) {
+			try {
+				bundleId = Integer.parseInt(args[0]);
+			} catch (NumberFormatException e) {
+				filterText = args[0];
+			}
+		}
+
+		Map<Long, BundleStatus> bundles = manager.getBundles();
+		context.println("[ ID] Symbolic Name\t\t\t\tVersion\t  Build Info");
+		drawLine(80);
+
+		Set<Long> sortedKeys = new TreeSet<Long>(bundles.keySet());
+		for (Long key : sortedKeys) {
+			BundleStatus status = bundles.get(key);
+			if (filterText != null) {
+				boolean filtered = false;
+				for (String arg : args) {
+					if (status.getSymbolicName().indexOf(arg) < 0)
+						filtered = true;
+				}
+				if (filtered)
+					continue;
+			}
+			String buildInfo = null;
+
+			Bundle bundle = bc.getBundle(key);
+			URL resource = bundle.getResource("git.properties");
+			if (resource != null) {
+				InputStream s = null;
+				try {
+					Properties prop = new Properties();
+					prop.load((s = resource.openStream()));
+					buildInfo = String.format("%s@%s",
+							prop.getProperty("git.commit.id.describe"),
+							prop.getProperty("git.remote.origin.url"));
+				} catch (IOException e) {
+					// ignore
+				} finally {
+					if (s != null)
+						try {
+							s.close();
+						} catch (IOException e) {
+						}						
+				}
+			}
+
+			context.printf("[%3d] %-41s %s\t  %s\n", key, status.getSymbolicName(), status.getVersion(),
+					buildInfo == null ? "N/A" : buildInfo);
 		}
 	}
 
