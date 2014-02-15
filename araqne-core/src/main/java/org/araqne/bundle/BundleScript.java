@@ -221,6 +221,9 @@ public class BundleScript implements Script {
 		setRepositoryPriority(alias, newPriority);
 	}
 
+	@ScriptUsage(description = "Install new bundle", arguments = {
+			@ScriptArgument(name = "group id, file:// or http:// url", autocompletion = BundlePathCompleter.class),
+			@ScriptArgument(name = "artifact id", optional = true), @ScriptArgument(name = "version", optional = true) })
 	public void install(String[] args) {
 		try {
 			if (args.length == 0)
@@ -326,8 +329,7 @@ public class BundleScript implements Script {
 			@ScriptArgument(name = "bundleId", type = "integer", description = "bundle id to update version"),
 			@ScriptArgument(name = "groupId", type = "string", description = "group id of existing bundle"),
 			@ScriptArgument(name = "artifactId", type = "string", description = "artifact id of existing bundle"),
-			@ScriptArgument(name = "version", type = "string", description = "version to update", optional = true),
-	})
+			@ScriptArgument(name = "version", type = "string", description = "version to update", optional = true), })
 	public void updateVersion(String[] args) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		try {
@@ -343,7 +345,7 @@ public class BundleScript implements Script {
 				return;
 
 			Version oldVersion = b.getVersion();
-			
+
 			String before = (String) b.getHeaders().get("Bnd-LastModified");
 			manager.updateBundleVersion(bundleId, groupId, artiId, version);
 			String after = (String) b.getHeaders().get("Bnd-LastModified");
@@ -371,15 +373,14 @@ public class BundleScript implements Script {
 
 	@ScriptUsage(description = "replace a bundle with another bundle. USE AT YOUR OWN RISK.", arguments = {
 			@ScriptArgument(name = "bundle id", type = "integer", description = "bundle id to update version"),
-			@ScriptArgument(name = "file url", type = "string", description = "jar file url to update"),
-	})
+			@ScriptArgument(name = "file url", type = "string", description = "jar file url to update which starts with file://", autocompletion = BundlePathCompleter.class), })
 	public void replace(String[] args) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		try {
 			String bundleLocation = null;
 			long bundleId = Long.parseLong(args[0]);
 			if (args.length > 1)
-				bundleLocation = args[1];
+				bundleLocation = args[1].replace('\\', '/');
 			else
 				return;
 
