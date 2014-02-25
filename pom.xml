@@ -182,7 +182,7 @@
 						<always>false</always>
 						<abbrev>7</abbrev>
 						<dirty>-dirty</dirty>
-						<forceLongFormat>false</forceLongFormat>
+						<forceLongFormat>true</forceLongFormat>
 					</gitDescribe>
 				</configuration>
 			</plugin>
