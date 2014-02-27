@@ -676,9 +676,24 @@ public class BundleScript implements Script {
 				try {
 					Properties prop = new Properties();
 					prop.load((s = resource.openStream()));
-					buildInfo = String.format("%s@%s",
-							prop.getProperty("git.commit.id.describe"),
-							prop.getProperty("git.remote.origin.url"));
+					
+					String abbrev = prop.getProperty("git.commit.id.abbrev");
+					
+					String describe = prop.getProperty("git.commit.id.describe");
+					boolean dirty = false;
+					if (describe.endsWith("-dirty"))
+						abbrev += "-dirty";
+					
+					if (abbrev.equals(describe)) {
+						buildInfo = String.format("%s@%s",
+								abbrev,
+								prop.getProperty("git.remote.origin.url"));
+					} else {
+						buildInfo = String.format("%s@%s (%s)",
+								abbrev,
+								prop.getProperty("git.remote.origin.url"),
+								describe);
+					}
 				} catch (IOException e) {
 					// ignore
 				} finally {
