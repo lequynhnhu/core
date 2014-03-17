@@ -603,10 +603,12 @@ public class PackageManagerService implements PackageManager {
 
 			return metadata;
 		} catch (IOException e) {
-			if (monitor != null && e.getMessage().contains("digest auth failed"))
-				monitor.writeln(" (auth fail)");
-			else
-				monitor.writeln(" (not found)");
+			if (monitor != null) {
+				if (e.getMessage().contains("digest auth failed"))
+					monitor.writeln(" (auth fail)");
+				else
+					monitor.writeln(" (not found)");
+			}
 
 			return null;
 		}
@@ -630,8 +632,10 @@ public class PackageManagerService implements PackageManager {
 			ServiceReference<?> ref = bc.getServiceReference(KeyStoreManager.class.getName());
 			KeyStoreManager keyman = (KeyStoreManager) bc.getService(ref);
 			try {
-				TrustManagerFactory tmf = keyman.getTrustManagerFactory(repo.getTrustStoreAlias(), TrustManagerFactory.getDefaultAlgorithm());
-				KeyManagerFactory kmf = keyman.getKeyManagerFactory(repo.getKeyStoreAlias(), KeyManagerFactory.getDefaultAlgorithm());
+				TrustManagerFactory tmf = keyman.getTrustManagerFactory(repo.getTrustStoreAlias(),
+						TrustManagerFactory.getDefaultAlgorithm());
+				KeyManagerFactory kmf = keyman.getKeyManagerFactory(repo.getKeyStoreAlias(),
+						KeyManagerFactory.getDefaultAlgorithm());
 				HttpWagon.download(url, tmf, kmf);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
@@ -661,8 +665,10 @@ public class PackageManagerService implements PackageManager {
 			ServiceReference<?> ref = bc.getServiceReference(KeyStoreManager.class.getName());
 			KeyStoreManager keyman = (KeyStoreManager) bc.getService(ref);
 			try {
-				TrustManagerFactory tmf = keyman.getTrustManagerFactory(repo.getTrustStoreAlias(), TrustManagerFactory.getDefaultAlgorithm());
-				KeyManagerFactory kmf = keyman.getKeyManagerFactory(repo.getKeyStoreAlias(), KeyManagerFactory.getDefaultAlgorithm());
+				TrustManagerFactory tmf = keyman.getTrustManagerFactory(repo.getTrustStoreAlias(),
+						TrustManagerFactory.getDefaultAlgorithm());
+				KeyManagerFactory kmf = keyman.getKeyManagerFactory(repo.getKeyStoreAlias(),
+						KeyManagerFactory.getDefaultAlgorithm());
 				HttpWagon.download(url, tmf, kmf);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();

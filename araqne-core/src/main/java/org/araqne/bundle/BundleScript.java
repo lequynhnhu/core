@@ -15,13 +15,11 @@
  */
 package org.araqne.bundle;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -676,23 +674,18 @@ public class BundleScript implements Script {
 				try {
 					Properties prop = new Properties();
 					prop.load((s = resource.openStream()));
-					
+
 					String abbrev = prop.getProperty("git.commit.id.abbrev");
-					
+
 					String describe = prop.getProperty("git.commit.id.describe");
 					boolean dirty = false;
 					if (describe.endsWith("-dirty"))
 						abbrev += "-dirty";
-					
+
 					if (abbrev.equals(describe)) {
-						buildInfo = String.format("%s@%s",
-								abbrev,
-								prop.getProperty("git.remote.origin.url"));
+						buildInfo = String.format("%s@%s", abbrev, prop.getProperty("git.remote.origin.url"));
 					} else {
-						buildInfo = String.format("%s@%s (%s)",
-								abbrev,
-								prop.getProperty("git.remote.origin.url"),
-								describe);
+						buildInfo = String.format("%s@%s (%s)", abbrev, prop.getProperty("git.remote.origin.url"), describe);
 					}
 				} catch (IOException e) {
 					// ignore
@@ -701,7 +694,7 @@ public class BundleScript implements Script {
 						try {
 							s.close();
 						} catch (IOException e) {
-						}						
+						}
 				}
 			}
 

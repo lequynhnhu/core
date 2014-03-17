@@ -206,10 +206,12 @@ public class MavenResolver {
 				}
 				return localJar;
 			} catch (Exception e) {
-				if (monitor != null && e.getMessage().contains("digest auth failed"))
-					monitor.write(" (auth fail)");
-				else
-					monitor.write(" (not found)");
+				if (monitor != null) {
+					if (e.getMessage().contains("digest auth failed"))
+						monitor.write(" (auth fail)");
+					else
+						monitor.write(" (not found)");
+				}
 
 				logger.info("maven resolver: failed to get {} {}", pomUrl, e.getMessage());
 			} finally {
@@ -251,8 +253,10 @@ public class MavenResolver {
 				String trustStoreAlias = repository.getTrustStoreAlias();
 				String keyStoreAlias = repository.getKeyStoreAlias();
 
-				TrustManagerFactory tmf = keyStoreManager.getTrustManagerFactory(trustStoreAlias, TrustManagerFactory.getDefaultAlgorithm());
-				KeyManagerFactory kmf = keyStoreManager.getKeyManagerFactory(keyStoreAlias, KeyManagerFactory.getDefaultAlgorithm());
+				TrustManagerFactory tmf = keyStoreManager.getTrustManagerFactory(trustStoreAlias,
+						TrustManagerFactory.getDefaultAlgorithm());
+				KeyManagerFactory kmf = keyStoreManager.getKeyManagerFactory(keyStoreAlias,
+						KeyManagerFactory.getDefaultAlgorithm());
 
 				return HttpWagon.openDownloadStream(url, tmf, kmf);
 			} catch (NoSuchAlgorithmException e) {

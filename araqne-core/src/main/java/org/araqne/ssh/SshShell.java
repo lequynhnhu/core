@@ -32,7 +32,6 @@ import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.Signal;
 import org.apache.sshd.server.SignalListener;
 import org.araqne.ansicode.AnsiEscapeCode;
-import org.araqne.api.BannerService;
 import org.araqne.api.ScriptOutputStream;
 import org.araqne.api.TelnetCommand;
 import org.araqne.console.ConsoleInputStream;
