@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import org.araqne.cron.Schedule;
 import org.osgi.framework.InvalidSyntaxException;
@@ -74,6 +75,15 @@ public class Scheduler {
 		}
 	}
 
+	public void puts(Map<Integer, Schedule> schedules) {
+		synchronized (queue) {
+			for (Integer id : schedules.keySet()) {
+				Job job = new Job(id, schedules.get(id));
+				queue.add(job);
+			}
+		}
+	}
+
 	/**
 	 * delete the schedule according to the given id from the scheduling queue.
 	 * 
@@ -84,6 +94,21 @@ public class Scheduler {
 		synchronized (queue) {
 			for (Object job : queue.toArray()) {
 				if (((Job) job).getScheduleId() == id)
+					queue.remove(job);
+			}
+		}
+	}
+
+	/**
+	 * delete the schedules according to the given ids from the scheduling
+	 * queue.
+	 * 
+	 * @param ids
+	 */
+	public void removes(Set<Integer> ids) {
+		synchronized (queue) {
+			for (Object job : queue.toArray()) {
+				if (ids.contains(((Job) job).getScheduleId()))
 					queue.remove(job);
 			}
 		}

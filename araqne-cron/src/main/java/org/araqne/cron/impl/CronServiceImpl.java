@@ -16,10 +16,12 @@
 package org.araqne.cron.impl;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -101,6 +103,21 @@ public class CronServiceImpl implements CronService {
 		return id;
 	}
 
+	@Override
+	public void registerSchedules(List<Schedule> schedules) {
+		for (Schedule e : map.values())
+			if (schedules.contains(e))
+				throw new DuplicatedScheduleException(e);
+		try {
+			Map<Integer, Schedule> addedSchedules = config.addEntries(schedules);
+			this.map.putAll(addedSchedules);
+			scheduler.puts(addedSchedules);
+		} catch (Throwable t) {
+			throw new IllegalStateException("cannot register schedules");
+		}
+
+	}
+
 	/**
 	 * unregister schedule. schedule is removed from db, and from scheduler.
 	 */
@@ -110,6 +127,19 @@ public class CronServiceImpl implements CronService {
 			throw new NoSuchElementException();
 		config.removeEntry(i);
 		scheduler.remove(i);
+	}
+
+	@Override
+	public void unregisterSchedules(Set<Integer> ids) {
+		try {
+			config.removeEntries(ids);
+			scheduler.removes(ids);
+
+			for (Integer id : ids)
+				this.map.remove(id);
+		} catch (Throwable t) {
+			throw new IllegalStateException("cannot unregister schedules");
+		}
 	}
 
 	/**
@@ -158,7 +188,8 @@ public class CronServiceImpl implements CronService {
 	 *             when given instance name is not a valid string.
 	 */
 	private static Runnable getRef(BundleContext context, String instanceName) throws InvalidSyntaxException {
-		ServiceReference<?>[] refs = context.getServiceReferences(Runnable.class.getName(), "(instance.name=" + instanceName + ")");
+		ServiceReference<?>[] refs = context.getServiceReferences(Runnable.class.getName(), "(instance.name=" + instanceName
+				+ ")");
 		if (refs == null || refs.length == 0) {
 			throw new NullPointerException();
 		}

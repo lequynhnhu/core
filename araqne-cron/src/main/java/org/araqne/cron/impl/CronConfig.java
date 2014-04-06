@@ -18,13 +18,17 @@ package org.araqne.cron.impl;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.araqne.confdb.CollectionName;
 import org.araqne.confdb.Config;
 import org.araqne.confdb.ConfigDatabase;
+import org.araqne.confdb.ConfigIterator;
 import org.araqne.confdb.ConfigService;
+import org.araqne.confdb.ConfigTransaction;
 import org.araqne.confdb.Predicates;
 import org.araqne.cron.Schedule;
 
@@ -74,6 +78,31 @@ public class CronConfig {
 		return info.id;
 	}
 
+	public Map<Integer, Schedule> addEntries(List<Schedule> schedules) {
+		Map<Integer, Schedule> addedSchedules = new HashMap<Integer, Schedule>();
+		ConfigTransaction xact = db.beginTransaction();
+		try {
+			for (Schedule schedule : schedules) {
+				ScheduleInfo info = new ScheduleInfo();
+				info.id = maxId.incrementAndGet();
+				info.task = schedule.getTaskName();
+				info.minute = schedule.get(CronField.Type.MINUTE).toString();
+				info.hour = schedule.get(CronField.Type.HOUR).toString();
+				info.dayOfMonth = schedule.get(CronField.Type.DAY_OF_MONTH).toString();
+				info.month = schedule.get(CronField.Type.MONTH).toString();
+				info.dayOfWeek = schedule.get(CronField.Type.DAY_OF_WEEK).toString();
+				info.tag = schedule.getTag();
+				db.add(xact, info);
+				addedSchedules.put(info.id, schedule);
+			}
+			xact.commit("araqne-cron", "create schedule info entries");
+			return addedSchedules;
+		} catch (Throwable t) {
+			xact.rollback();
+			throw new IllegalStateException("cannot create schedule infos");
+		}
+	}
+
 	/**
 	 * remove the schedule represented by the given id from db.
 	 * 
@@ -83,6 +112,30 @@ public class CronConfig {
 		Config c = db.findOne(ScheduleInfo.class, Predicates.field("id", id));
 		if (c != null)
 			db.remove(c);
+	}
+
+	/**
+	 * remove the schedules represented by given ids from db.
+	 * 
+	 * @param ids
+	 */
+	public void removeEntries(Set<Integer> ids) {
+		ConfigIterator it = null;
+		ConfigTransaction xact = db.beginTransaction();
+		try {
+			it = db.find(ScheduleInfo.class, Predicates.in("id", ids));
+			while (it.hasNext()) {
+				Config c = it.next();
+				db.remove(xact, c, false);
+			}
+			xact.commit("araqne-cron", "remove schedule info entries");
+		} catch (Throwable t) {
+			xact.rollback();
+			throw new IllegalStateException("cannot remove schedule infos");
+		} finally {
+			if (it != null)
+				it.close();
+		}
 	}
 
 	/**

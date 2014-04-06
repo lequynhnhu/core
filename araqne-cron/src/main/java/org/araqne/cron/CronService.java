@@ -17,6 +17,7 @@ package org.araqne.cron;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * cronService interface
@@ -27,9 +28,14 @@ import java.util.Map;
 public interface CronService {
 	int registerSchedule(Schedule schedule);
 
+	void registerSchedules(List<Schedule> schedules);
+
 	void unregisterSchedule(int id);
+
+	void unregisterSchedules(Set<Integer> ids);
 
 	Map<Integer, Schedule> getSchedules();
 
 	List<String> getJobList();
+
 }
