@@ -39,9 +39,20 @@ public class LogCleaner implements Runnable {
 					}
 				});
 
+				String days = System.getProperty("araqne.log.keepdays");
+				int keepLogDays = KEEP_LOG_DAYS;
+				try {
+					if (days != null)
+						keepLogDays = Integer.parseInt(days);
+				} catch (NumberFormatException e) {
+				}
+				
+				if (keepLogDays < 0)
+					keepLogDays = KEEP_LOG_DAYS;
+
 				// delete older than 1 weeks
 				Calendar cal = Calendar.getInstance();
-				cal.add(Calendar.DAY_OF_MONTH, -KEEP_LOG_DAYS);
+				cal.add(Calendar.DAY_OF_MONTH, -keepLogDays);
 				Date baseline = cal.getTime();
 
 				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
