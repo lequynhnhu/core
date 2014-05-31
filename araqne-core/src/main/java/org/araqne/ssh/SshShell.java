@@ -111,7 +111,7 @@ public class SshShell implements Command, Runnable, QuitHandler {
 
 	@Override
 	public void destroy() {
-		logger.info("destroy called");
+		logger.debug("araqne core: destroy called");
 		closed = true;
 		thread.interrupt();
 	}
@@ -132,7 +132,7 @@ public class SshShell implements Command, Runnable, QuitHandler {
 				e.printStackTrace();
 		} finally {
 			callback.onExit(0);
-			logger.info("ssh shell closed: user " + username);
+			logger.info("araqne core: closed user [{}] ssh shell", username);
 		}
 	}
 
