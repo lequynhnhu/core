@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketAddress;
 
 import org.apache.mina.core.filterchain.IoFilter.NextFilter;
 import org.apache.mina.core.session.IoSession;
@@ -54,10 +55,13 @@ public class SshShell implements Command, Runnable, QuitHandler {
 	private String username;
 	private boolean closed = false;
 
-	public SshShell() {
-		context = new ScriptContextImpl(Araqne.getContext(), this);
-		session = new ShellSession(context);
-		tsm = new TelnetStateMachine(new MessageReceiver(session), context);
+	private IoSession ioSession;
+
+	public SshShell(IoSession ioSession) {
+		this.ioSession = ioSession;
+		this.context = new ScriptContextImpl(Araqne.getContext(), this);
+		this.session = new ShellSession(context);
+		this.tsm = new TelnetStateMachine(new MessageReceiver(session), context);
 	}
 
 	@Override
@@ -132,7 +136,11 @@ public class SshShell implements Command, Runnable, QuitHandler {
 				e.printStackTrace();
 		} finally {
 			callback.onExit(0);
-			logger.info("araqne core: closed user [{}] ssh shell", username);
+			SocketAddress remoteAddr = null;
+			if (ioSession != null)
+				remoteAddr = ioSession.getRemoteAddress();
+
+			logger.info("araqne core: closed ssh shell for user [{}] from [{}]", username, remoteAddr);
 		}
 	}
 
@@ -204,10 +212,11 @@ public class SshShell implements Command, Runnable, QuitHandler {
 				out.write(b);
 				out.flush();
 			} catch (IOException e) {
-				logger.error("araqne core: print error", e);
 				if (e instanceof SshException && e.getMessage().equals("Already closed")) {
 					throw new IllegalStateException("SSH: Already Closed");
 				}
+
+				logger.error("araqne core: print error", e);
 			}
 			return this;
 		}

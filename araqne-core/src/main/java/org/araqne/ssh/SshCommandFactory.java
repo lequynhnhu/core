@@ -15,12 +15,16 @@
  */
 package org.araqne.ssh;
 
+import org.apache.mina.core.session.IoSession;
 import org.apache.sshd.common.Factory;
 import org.apache.sshd.server.Command;
 
 public class SshCommandFactory implements Factory<Command> {
+
+	public static ThreadLocal<IoSession> session = new ThreadLocal<IoSession>();
+
 	@Override
 	public Command create() {
-		return new SshShell();
+		return new SshShell(session.get());
 	}
 }
