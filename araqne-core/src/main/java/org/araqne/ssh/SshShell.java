@@ -181,6 +181,9 @@ public class SshShell implements Command, Runnable, QuitHandler {
 				out.write(code.toByteArray());
 				out.flush();
 			} catch (Exception e) {
+				if (e.getMessage().toLowerCase().contains("already closed"))
+					throw new IllegalStateException("Already closed", e);
+
 				logger.error("araqne core: print error", e);
 			}
 			return this;
