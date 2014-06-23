@@ -173,4 +173,6 @@ com.jcraft.jsch.jcraft; version=0.1.48,
 org.json;version=1.1.1,
 com.bethecoder.ascii_table; version=2.5.2,
 com.bethecoder.ascii_table.impl; version=2.5.2,
-com.bethecoder.ascii_table.spec; version=2.5.2
+com.bethecoder.ascii_table.spec; version=2.5.2,
+joptsimple;version=4.6,
+joptsimple.util;version=4.6
