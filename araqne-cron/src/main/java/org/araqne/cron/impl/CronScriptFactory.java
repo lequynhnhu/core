@@ -33,7 +33,6 @@ import org.osgi.framework.BundleContext;
 @Component(name = "cron-script-factory")
 @Provides
 public class CronScriptFactory implements ScriptFactory {
-	@SuppressWarnings("unused")
 	@ServiceProperty(name = "alias", value = "cron")
 	private String alias;
 

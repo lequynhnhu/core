@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import org.araqne.api.Script;
 import org.araqne.api.ScriptArgument;
