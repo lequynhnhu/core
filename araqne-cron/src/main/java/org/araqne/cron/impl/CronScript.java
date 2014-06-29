@@ -16,8 +16,11 @@
 package org.araqne.cron.impl;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.araqne.api.Script;
 import org.araqne.api.ScriptArgument;
@@ -59,7 +62,9 @@ public class CronScript implements Script {
 		context.println("---------------");
 
 		Map<Integer, Schedule> schedules = manager.getSchedules();
-		for (Integer key : schedules.keySet()) {
+		ArrayList<Integer> keys = new ArrayList<Integer>(schedules.keySet());
+		Collections.sort(keys);
+		for (Integer key : keys) {
 			Schedule schedule = schedules.get(key);
 			context.println(String.format("[%3d] %s", key, schedule));
 		}
