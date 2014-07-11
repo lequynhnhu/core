@@ -73,6 +73,11 @@ public class ScriptRunner implements Runnable {
 		}
 
 		@Override
+		public String readLine(String initialValue) throws InterruptedException {
+			return scanner.nextLine();
+		}
+
+		@Override
 		public void flush() {
 			try {
 				while (reader.read() != -1)

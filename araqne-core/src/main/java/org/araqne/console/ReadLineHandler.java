@@ -37,6 +37,16 @@ class ReadLineHandler implements FunctionKeyEventListener {
 		this.history = new LinkedList<String>();
 		resetIndex();
 	}
+	
+	public String getLine(String initialValue) throws InterruptedException {
+		if (initialValue == null)
+			initialValue = "";
+		
+		input = initialValue;
+		inputCursor = initialValue.length();
+		sync();
+		return getLine();
+	}
 
 	public String getLine() throws InterruptedException {
 		ScriptOutputStream out = context.getOutputStream();

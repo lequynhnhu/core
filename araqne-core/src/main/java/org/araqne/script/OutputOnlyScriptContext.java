@@ -100,6 +100,11 @@ public class OutputOnlyScriptContext implements ScriptContext {
 	}
 
 	@Override
+	public String readLine(String initialValue) throws InterruptedException {
+		return null;
+	}
+
+	@Override
 	public String readPassword() throws InterruptedException {
 		return null;
 	}

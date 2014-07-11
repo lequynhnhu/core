@@ -60,6 +60,16 @@ public class ConsoleInputStream implements ScriptInputStream {
 	}
 
 	@Override
+	public String readLine(String initialValue) throws InterruptedException {
+		try {
+			addFunctionKeyEventListener(readline);
+			return readline.getLine(initialValue);
+		} finally {
+			removeFunctionKeyEventListener(readline);
+		}
+	}
+
+	@Override
 	public void flush() {
 		readline.flush();
 	}

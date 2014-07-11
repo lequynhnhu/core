@@ -195,6 +195,11 @@ public class ScriptContextImpl implements ScriptContext {
 	}
 
 	@Override
+	public String readLine(String initialValue) throws InterruptedException {
+		return inputStream.readLine(initialValue);
+	}
+
+	@Override
 	public String readPassword() throws InterruptedException {
 		turnEchoOff();
 		try {

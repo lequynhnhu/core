@@ -21,7 +21,7 @@ import org.araqne.ansicode.AnsiEscapeCode;
 
 public interface ScriptContext {
 	AccountManager getAccountManager();
-	
+
 	void quit();
 
 	int getWidth();
@@ -48,10 +48,12 @@ public interface ScriptContext {
 
 	String readLine() throws InterruptedException;
 
+	String readLine(String initialValue) throws InterruptedException;
+
 	String readPassword() throws InterruptedException;
 
 	void printPrompt();
-	
+
 	void println();
 
 	void println(String value);

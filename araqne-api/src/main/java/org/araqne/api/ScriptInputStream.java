@@ -26,6 +26,8 @@ public interface ScriptInputStream {
 
 	String readLine() throws InterruptedException;
 
+	String readLine(String initialValue) throws InterruptedException;
+
 	void flush();
 
 	void flush(Collection<Character> drain);
