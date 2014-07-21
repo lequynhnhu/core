@@ -297,7 +297,7 @@ public class CoreScript implements Script {
 	}
 
 	public static File canonicalize(File dir, String path) throws IOException {
-		if (File.separator.equals("\\") && 
+		if (File.separator.equals("\\") &&
 				(path.startsWith("\\") || (path.length() >= 3 && path.startsWith(":\\", 1))))
 			return new File(path).getCanonicalFile();
 		else if (path.startsWith("/"))
@@ -354,10 +354,11 @@ public class CoreScript implements Script {
 	public void shutdown(String[] args) {
 		if (Araqne.isServiceMode()) {
 			context.println("You cannot use shutdown command when Araqne is running in service mode.");
-		}
-		try {
-			Araqne.getContext().getBundle(0).stop();
-		} catch (BundleException e) {
+		} else {
+			try {
+				Araqne.getContext().getBundle(0).stop();
+			} catch (BundleException e) {
+			}
 		}
 	}
 
