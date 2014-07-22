@@ -38,6 +38,7 @@ import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.prefs.impl.PreferencesManager;
 import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.DailyRollingFileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
@@ -475,9 +476,9 @@ public class Araqne implements BundleActivator, SignalHandler {
 			rootLogger.setLevel(Level.DEBUG);
 			PatternLayout layout = new PatternLayout("[%d] %5p (%c{1}) - %m%n");
 			rootLogger.addAppender(new ConsoleAppender(layout));
-			// rootLogger.addAppender(new DailyRollingFileAppender(layout,
-			// logPath, ".yyyy-MM-dd"));
-			rootLogger.addAppender(new AraqneFileAppender(layout, logPath, ".yyyy-MM-dd"));
+			rootLogger.addAppender(new DailyRollingFileAppender(layout, logPath, ".yyyy-MM-dd"));
+			// rootLogger.addAppender(new AraqneFileAppender(layout, logPath,
+			// ".yyyy-MM-dd"));
 
 			logCleaner = new Thread(new LogCleaner(), "Araqne Log Cleaner");
 			logCleaner.start();
