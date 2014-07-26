@@ -225,6 +225,9 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 	@Override
 	public long installBundle(String filePath) {
 		try {
+			if (!isBundleJar(new File(filePath.substring("file://".length()))))
+				throw new IllegalStateException("invalid OSGi bundle: " + filePath);
+
 			Bundle bundle = context.installBundle(filePath);
 			return bundle.getBundleId();
 		} catch (BundleException e) {
@@ -253,6 +256,9 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 					+ (artifact.getVersion() != null ? (" (" + artifact.getVersion() + ")") : ""));
 
 		File file = resolver.resolve(artifact);
+		if (!isBundleJar(file))
+			throw new IllegalStateException("invalid OSGi bundle: " + groupId + "/" + artifactId + " (" + version + ")");
+
 		String filePath = file.getAbsolutePath();
 
 		try {
@@ -263,6 +269,29 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 			return newBundle.getBundleId();
 		} catch (BundleException e) {
 			throw new IllegalStateException(e);
+		}
+	}
+
+	private static boolean isBundleJar(File f) {
+		if (!f.isFile() || !f.exists())
+			return false;
+
+		JarFile jar = null;
+		try {
+			jar = new JarFile(f);
+			if (jar.getManifest() == null || jar.getManifest().getMainAttributes() == null)
+				return false;
+
+			return jar.getManifest().getMainAttributes().getValue("Bundle-SymbolicName") != null;
+		} catch (IOException e) {
+			throw new IllegalArgumentException("cannot check OSGi bundle manifest: " + f.getAbsolutePath());
+		} finally {
+			if (jar != null) {
+				try {
+					jar.close();
+				} catch (IOException e) {
+				}
+			}
 		}
 	}
 
@@ -439,7 +468,11 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 		}
 
 		try {
-			bundle.update(new FileInputStream(new File(new URI(bundleLocation))));
+			File file = new File(new URI(bundleLocation));
+			if (!isBundleJar(file))
+				throw new IllegalStateException("invalid OSGi bundle: " + bundleLocation);
+
+			bundle.update(new FileInputStream(file));
 		} catch (Exception e) {
 			throw new IllegalStateException("bundleId: " + bundleId + ", location: " + bundleLocation, e);
 		}
@@ -462,7 +495,8 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 
 		try {
 			File file = resolver.resolve(artifact);
-			String filePath = getPrefix() + file.getAbsolutePath().replace('\\', '/');
+			if (!isBundleJar(file))
+				throw new IllegalStateException("invalid OSGi bundle: " + groupId + "/" + artifactId + " (" + version + ")");
 
 			bundle.update(new FileInputStream(file));
 		} catch (Exception e) {
