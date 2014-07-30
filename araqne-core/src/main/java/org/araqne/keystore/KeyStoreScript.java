@@ -107,9 +107,8 @@ public class KeyStoreScript implements Script {
 		for (String name : manager.getKeyStoreNames()) {
 			Properties p = manager.getKeyStoreProperties(name);
 			String type = p.getProperty("type");
-			String password = p.getProperty("password");
 			String path = p.getProperty("path");
-			context.printf("[%s] type: %s, password: %s, path: %s\n", name, type, password, path);
+			context.printf("[%s] type: %s, path: %s\n", name, type, path);
 		}
 	}
 

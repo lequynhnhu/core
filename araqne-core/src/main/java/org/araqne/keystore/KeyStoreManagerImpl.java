@@ -177,7 +177,9 @@ public class KeyStoreManagerImpl implements KeyStoreManager {
 		ksc.setAlias(alias);
 		ksc.setType(type);
 		ksc.setPath(path);
-		ksc.setPassword(new String(password));
+		if (password != null)
+			ksc.setPassword(new String(password));
+
 		db.add(ksc);
 	}
 
@@ -194,11 +196,12 @@ public class KeyStoreManagerImpl implements KeyStoreManager {
 		if (keyStoreMap.containsKey(alias))
 			throw new RuntimeException("duplicated key store alias");
 
-		Properties props = newProperties(alias, type, password);
-		keyStoreProps.put(alias, props);
-
+		// validate first
 		KeyStore ks = KeyStore.getInstance(type);
 		ks.load(is, password);
+
+		Properties props = newProperties(alias, type, password);
+		keyStoreProps.put(alias, props);
 		keyStoreMap.put(alias, ks);
 	}
 
