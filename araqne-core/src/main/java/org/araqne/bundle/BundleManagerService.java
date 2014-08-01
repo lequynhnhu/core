@@ -94,7 +94,13 @@ public class BundleManagerService implements SynchronousBundleListener, BundleMa
 			long id = -1;
 			try {
 				logger.info("araqne core: installing plugin bundle [{}]", f.getAbsolutePath());
-				id = installBundle("file://" + f.getAbsolutePath());
+
+				String filePath = f.getAbsolutePath();
+				String os = System.getProperty("os.name");
+				if (os != null && os.contains("Windows"))
+					filePath = "/" + filePath;
+
+				id = installBundle("file://" + filePath);
 			} catch (Throwable t) {
 				logger.error("araqne core: cannot install plugin bundle [" + f.getAbsolutePath() + "]", t);
 				continue;
