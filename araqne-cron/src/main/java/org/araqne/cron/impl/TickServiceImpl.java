@@ -79,9 +79,9 @@ public class TickServiceImpl implements TickService, Runnable {
 					lastTime = now;
 
 					List<TickTimer> targets = new ArrayList<TickTimer>();
-					while (true) {
-						DelayedEvent ev = null;
-						synchronized (queue) {
+					synchronized (queue) {
+						while (true) {
+							DelayedEvent ev = null;
 							ev = queue.peek();
 							if (ev == null)
 								break;
@@ -158,7 +158,7 @@ public class TickServiceImpl implements TickService, Runnable {
 			throw new IllegalStateException("tick listener not found: " + listener);
 
 		synchronized (queue) {
-			DelayedEvent ev = eventMap.get(listener);
+			DelayedEvent ev = eventMap.remove(listener);
 			if (ev != null) {
 				queue.remove(ev);
 			}
