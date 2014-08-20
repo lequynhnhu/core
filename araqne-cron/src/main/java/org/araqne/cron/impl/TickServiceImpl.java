@@ -16,9 +16,9 @@
 package org.araqne.cron.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,9 +37,10 @@ import org.slf4j.LoggerFactory;
 @Provides(specifications = { TickService.class })
 public class TickServiceImpl implements TickService, Runnable {
 	private final Logger slog = LoggerFactory.getLogger(TickServiceImpl.class);
-	private PriorityQueue<DelayedEvent> queue = new PriorityQueue<DelayedEvent>();
+
 	private CopyOnWriteArraySet<TickTimer> listeners = new CopyOnWriteArraySet<TickTimer>();
-	private ConcurrentHashMap<TickTimer, DelayedEvent> eventMap = new ConcurrentHashMap<TickTimer, DelayedEvent>();
+	private PriorityQueue<DelayedEvent> queue = new PriorityQueue<DelayedEvent>();
+	private HashMap<TickTimer, DelayedEvent> eventMap = new HashMap<TickTimer, DelayedEvent>();
 
 	private volatile boolean doStop;
 
@@ -79,18 +80,21 @@ public class TickServiceImpl implements TickService, Runnable {
 
 					List<TickTimer> targets = new ArrayList<TickTimer>();
 					while (true) {
-						DelayedEvent ev = queue.peek();
-						if (ev == null)
-							break;
+						DelayedEvent ev = null;
+						synchronized (queue) {
+							ev = queue.peek();
+							if (ev == null)
+								break;
 
-						if (ev.scheduleTime <= now) {
-							eventMap.remove(ev.listener);
-							queue.poll();
-							executor.execute(ev);
+							if (ev.scheduleTime <= now) {
+								eventMap.remove(ev.listener);
+								queue.poll();
+								executor.execute(ev);
 
-							targets.add(ev.listener);
-						} else {
-							break;
+								targets.add(ev.listener);
+							} else {
+								break;
+							}
 						}
 					}
 
@@ -113,14 +117,18 @@ public class TickServiceImpl implements TickService, Runnable {
 	}
 
 	private void queueNextTick(long baseTime, TickTimer listener) {
-		DelayedEvent ev = new DelayedEvent(baseTime + listener.getInterval(), listener);
-		eventMap.put(listener, ev);
-		queue.add(ev);
+		synchronized (queue) {
+			DelayedEvent ev = new DelayedEvent(baseTime + listener.getInterval(), listener);
+			eventMap.put(listener, ev);
+			queue.add(ev);
+		}
 	}
 
 	private void handleClockReset(long oldTime, long newTime) {
-		queue.clear();
-		eventMap.clear();
+		synchronized (queue) {
+			queue.clear();
+			eventMap.clear();
+		}
 
 		long now = System.currentTimeMillis();
 		for (TickTimer listener : listeners) {
@@ -149,9 +157,12 @@ public class TickServiceImpl implements TickService, Runnable {
 		if (!removed)
 			throw new IllegalStateException("tick listener not found: " + listener);
 
-		DelayedEvent ev = eventMap.get(listener);
-		if (ev != null)
-			queue.remove(ev);
+		synchronized (queue) {
+			DelayedEvent ev = eventMap.get(listener);
+			if (ev != null) {
+				queue.remove(ev);
+			}
+		}
 	}
 
 	private class DelayedEvent implements Comparable<DelayedEvent>, Runnable {
