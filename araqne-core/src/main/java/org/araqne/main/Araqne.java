@@ -71,8 +71,10 @@ import org.araqne.console.DefaultBannerService;
 import org.araqne.console.TelnetCodecFactory;
 import org.araqne.console.TelnetHandler;
 import org.araqne.cron.CronService;
+import org.araqne.cron.TickService;
 import org.araqne.cron.impl.CronScriptFactory;
 import org.araqne.cron.impl.CronServiceImpl;
+import org.araqne.cron.impl.TickServiceImpl;
 import org.araqne.instrumentation.InstrumentationServiceImpl;
 import org.araqne.keystore.KeyStoreScriptFactory;
 import org.araqne.logger.AraqneFileAppender;
@@ -125,6 +127,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 	private ConfigService conf;
 	private AuthService auth;
 	private CronService cron;
+	private TickServiceImpl tick;
 	private BannerService banner;
 
 	private static boolean serviceMode = false;
@@ -358,6 +361,8 @@ public class Araqne implements BundleActivator, SignalHandler {
 		conf = new FileConfigService();
 		auth = new DefaultAuthService(context, conf);
 		cron = new CronServiceImpl(context, conf);
+		tick = new TickServiceImpl();
+		tick.start();
 		banner = new DefaultBannerService();
 
 		registerScripts();
@@ -421,6 +426,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 		context.registerService(BannerService.class.getName(), banner, null);
 		context.registerService(InstrumentationService.class.getName(), new InstrumentationServiceImpl(), null);
 		context.registerService(CronService.class.getName(), cron, null);
+		context.registerService(TickService.class.getName(), tick, null);
 	}
 
 	/**

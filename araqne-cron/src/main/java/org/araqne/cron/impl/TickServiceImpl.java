@@ -15,9 +15,7 @@
  */
 package org.araqne.cron.impl;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,9 +28,8 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Validate;
-import org.araqne.cron.AbstractTickTimer;
-import org.araqne.cron.TickTimer;
 import org.araqne.cron.TickService;
+import org.araqne.cron.TickTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,29 +47,6 @@ public class TickServiceImpl implements TickService, Runnable {
 	private ExecutorService executor;
 
 	private long lastTime;
-
-	public static void main(String[] args) {
-		TickServiceImpl s = new TickServiceImpl();
-		s.start();
-
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		System.out.println("--base--" + df.format(new Date()));
-
-		TickTimer tick1 = new AbstractTickTimer() {
-			@Override
-			public int getInterval() {
-				return 1000;
-			}
-
-			@Override
-			public void onTick() {
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-				System.out.println("1sec " + df.format(new Date()));
-			}
-		};
-
-		s.addTimer(tick1);
-	}
 
 	@Validate
 	public void start() {

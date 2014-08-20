@@ -4,4 +4,5 @@
 	<instance component="cron-service" />
 	<instance component="cron-plugin" />
 	<instance component="cron-script-factory" />
+	<instance component="tick-service" />
 </ipojo>
