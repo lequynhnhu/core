@@ -20,9 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -45,13 +47,15 @@ public class TickServiceImpl implements TickService, Runnable {
 	private volatile boolean doStop;
 
 	private Thread ticker;
-	private ExecutorService executor;
+	private ThreadPoolExecutor executor;
 
 	private long lastTime;
 
 	@Validate
 	public void start() {
-		executor = Executors.newCachedThreadPool(new NamedThreadFactory());
+		executor = new ThreadPoolExecutor(0, 200, 10L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
+				new NamedThreadFactory());
+		executor.setRejectedExecutionHandler(new CallerRunsPolicy());
 		ticker = new Thread(this, "Ticker");
 		ticker.start();
 	}
