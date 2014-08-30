@@ -18,7 +18,7 @@ public class JSONConverter {
 		return writer.toString();
 	}
 
-	private static void jsonize(Object o, JSONWriter jsonWriter) throws JSONException {
+	public static void jsonize(Object o, JSONWriter jsonWriter) throws JSONException {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		if (o instanceof Map) {
 			jsonWriter.object();
