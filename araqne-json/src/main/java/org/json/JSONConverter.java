@@ -45,9 +45,18 @@ public class JSONConverter {
 
 			jsonWriter.endArray();
 			return;
+		} else if (o instanceof Object[]) {
+			jsonWriter.array();
+
+			Object[] l = (Object[]) o;
+			for (Object child : l)
+				jsonize(child, jsonWriter);
+
+			jsonWriter.endArray();
+			return;
 		}
 
-		throw new IllegalArgumentException("argument should be map or collection, " + o.getClass().getName());
+		throw new IllegalArgumentException("argument should be map, object array or collection, " + o.getClass().getName());
 	}
 
 	public static Map<String, Object> parse(JSONObject jsonObject) throws IOException {
