@@ -117,8 +117,13 @@ public class ThreadScript implements Script {
 					continue;
 				}
 			}
+			
+			String groupName = "N/A";
+			if (t.getThreadGroup() != null)
+				groupName = t.getThreadGroup().getName();
+			
 			context.printf("[%3d] %s, Group: %s, State: %s, Priority: %d\n", t.getId(), t.getName(),
-					t.getThreadGroup().getName(), t.getState(), t.getPriority());
+					groupName, t.getState(), t.getPriority());
 		}
 	}
 
