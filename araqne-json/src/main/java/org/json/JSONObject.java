@@ -1483,6 +1483,12 @@ public class JSONObject {
 			}
 			throw new JSONException("Bad value from toJSONString: " + o);
 		}
+		if (value instanceof Integer) {
+			return Integer.toString((Integer) value);
+		}
+		if (value instanceof Long) {
+			return Long.toString((Long) value);
+		}
 		if (value instanceof Number) {
 			return numberToString((Number) value);
 		}

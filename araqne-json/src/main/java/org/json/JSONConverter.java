@@ -18,8 +18,16 @@ public class JSONConverter {
 		return writer.toString();
 	}
 
+	private static ThreadLocal<SimpleDateFormat> isoDateFormat = new ThreadLocal<SimpleDateFormat>() {
+
+		@Override
+		protected SimpleDateFormat initialValue() {
+			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
+		}
+
+	};
+
 	public static void jsonize(Object o, JSONWriter jsonWriter) throws JSONException {
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		if (o instanceof Map) {
 			jsonWriter.object();
 
@@ -27,10 +35,9 @@ public class JSONConverter {
 			Map<String, Object> m = (HashMap<String, Object>) o;
 
 			for (String key : m.keySet()) {
+				jsonWriter.key(key);
 				Object val = m.get(key);
-				if (val instanceof Date)
-					val = df.format((Date) val);
-				jsonWriter.key(key).value(val);
+				jsonize(val, jsonWriter);
 			}
 
 			jsonWriter.endObject();
@@ -53,6 +60,14 @@ public class JSONConverter {
 				jsonize(child, jsonWriter);
 
 			jsonWriter.endArray();
+			return;
+		} else if (o instanceof String || o instanceof Number || o instanceof Boolean || o instanceof Date) {
+			if (o instanceof Date) {
+				SimpleDateFormat df = isoDateFormat.get();
+				o = df.format((Date) o);
+			}
+
+			jsonWriter.value(o);
 			return;
 		}
 
