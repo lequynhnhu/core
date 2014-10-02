@@ -61,8 +61,8 @@ public class JSONConverter {
 
 			jsonWriter.endArray();
 			return;
-		} else if (o instanceof String || o instanceof Number || o instanceof Boolean || o instanceof Date) {
-			if (o instanceof Date) {
+		} else if (o == null || o instanceof String || o instanceof Number || o instanceof Boolean || o instanceof Date) {
+			if (o != null && o instanceof Date) {
 				SimpleDateFormat df = isoDateFormat.get();
 				o = df.format((Date) o);
 			}
