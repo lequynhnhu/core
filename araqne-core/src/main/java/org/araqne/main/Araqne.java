@@ -197,6 +197,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 
 	public static void stopAraqne() throws Exception {
 		context.getBundle(0).stop();
+		felix.waitForStop(0);
 	}
 
 	public static void windowsService(String[] args) throws Exception {
