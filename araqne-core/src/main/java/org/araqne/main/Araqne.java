@@ -167,6 +167,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 	 */
 	public static void main(String[] args) throws Exception {
 		do {
+			restart = false;
 			startAraqne(new StartOptions(args));
 			felix.waitForStop(0);
 
@@ -233,13 +234,6 @@ public class Araqne implements BundleActivator, SignalHandler {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void boot(StartOptions startOptions) throws Exception {
-		// reboot case
-		// if (felix != null) {
-		// felix.init();
-		// felix.start();
-		// return;
-		// }
-
 		File jarPath = new File(URLDecoder.decode(Araqne.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 				"utf-8"));
 		File dir = jarPath.getParentFile();
@@ -526,11 +520,11 @@ public class Araqne implements BundleActivator, SignalHandler {
 			rootLogger.addAppender(new DailyRollingFileAppender(layout, logPath, ".yyyy-MM-dd"));
 			// rootLogger.addAppender(new AraqneFileAppender(layout, logPath,
 			// ".yyyy-MM-dd"));
-
-			logCleaner = new LogCleaner();
-			logCleaner.setDaemon(true);
-			logCleaner.start();
 		}
+		
+		logCleaner = new LogCleaner();
+		logCleaner.setDaemon(true);
+		logCleaner.start();
 	}
 
 	private void startSshServer() throws IOException {
