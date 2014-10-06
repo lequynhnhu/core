@@ -22,15 +22,26 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class LogCleaner implements Runnable {
+public class LogCleaner extends Thread {
 	private static final int PURGE_CYCLE = 3600 * 1000;
 	private static final int KEEP_LOG_DAYS = 7;
 	private static final String LOG_FILENAME = "araqne.log.";
+	private volatile boolean doStop;
+
+	public LogCleaner() {
+		super("Araqne Log Cleaner");
+	}
+
+	public void close() {
+		doStop = true;
+		interrupt();
+	}
 
 	@Override
 	public void run() {
 		try {
-			while (true) {
+			doStop = false;
+			while (!doStop) {
 				File logDir = new File(System.getProperty("araqne.log.dir"));
 				File[] logFiles = logDir.listFiles(new FilenameFilter() {
 					@Override
@@ -46,7 +57,7 @@ public class LogCleaner implements Runnable {
 						keepLogDays = Integer.parseInt(days);
 				} catch (NumberFormatException e) {
 				}
-				
+
 				if (keepLogDays < 0)
 					keepLogDays = KEEP_LOG_DAYS;
 

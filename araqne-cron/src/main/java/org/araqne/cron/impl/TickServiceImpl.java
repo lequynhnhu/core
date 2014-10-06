@@ -116,6 +116,7 @@ public class TickServiceImpl implements TickService, Runnable {
 		} catch (Throwable t) {
 			slog.error("araqne cron: ticker error", t);
 		} finally {
+			executor.shutdown();
 			slog.info("araqne cron: ticker stopped");
 		}
 	}
@@ -197,7 +198,9 @@ public class TickServiceImpl implements TickService, Runnable {
 	private class NamedThreadFactory implements ThreadFactory {
 		@Override
 		public Thread newThread(Runnable r) {
-			return new Thread(r, "Tick Thread Pool");
+			Thread t = new Thread(r, "Tick Thread Pool");
+			t.setDaemon(true);
+			return t;
 		}
 	}
 }

@@ -122,7 +122,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 	public static Instrumentation instrumentation = null;
 	private Logger logger = null;
 
-	private Thread logCleaner = null;
+	private LogCleaner logCleaner;
 
 	private PreferencesManager prefsManager;
 	private ConfigService conf;
@@ -170,10 +170,11 @@ public class Araqne implements BundleActivator, SignalHandler {
 			startAraqne(new StartOptions(args));
 			felix.waitForStop(0);
 
-			// ensure all system libraries unloaded
-			for (int i = 0; i < 5; i++)
-				System.gc();
-
+			if (restart) {
+				// ensure all system libraries unloaded
+				for (int i = 0; i < 5; i++)
+					System.gc();
+			}
 		} while (restart);
 	}
 
@@ -508,6 +509,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 	private void stopLogging() {
 		AraqneLoggerFactory araqneLoggerFactory = (AraqneLoggerFactory) StaticLoggerBinder.getSingleton().getLoggerFactory();
 		araqneLoggerFactory.stop();
+		logCleaner.close();
 	}
 
 	private void setDefaultLogging() throws IOException {
@@ -525,7 +527,8 @@ public class Araqne implements BundleActivator, SignalHandler {
 			// rootLogger.addAppender(new AraqneFileAppender(layout, logPath,
 			// ".yyyy-MM-dd"));
 
-			logCleaner = new Thread(new LogCleaner(), "Araqne Log Cleaner");
+			logCleaner = new LogCleaner();
+			logCleaner.setDaemon(true);
 			logCleaner.start();
 		}
 	}

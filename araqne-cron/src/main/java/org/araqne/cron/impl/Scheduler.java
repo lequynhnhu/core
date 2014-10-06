@@ -39,7 +39,7 @@ public class Scheduler {
 	private final Logger logger = LoggerFactory.getLogger(CronConfig.class.getName());
 	private PriorityQueue<Job> queue;
 	private final Thread loop = new Thread(new Loop(), "Cron Scheduler");
-	private boolean running;
+	private volatile boolean running;
 
 	public void start(Map<Integer, Schedule> map) {
 		queue = reset(map);
@@ -49,6 +49,7 @@ public class Scheduler {
 
 	public void stop() {
 		running = false;
+		loop.interrupt();
 	}
 
 	private PriorityQueue<Job> reset(Map<Integer, Schedule> map) {
@@ -146,7 +147,7 @@ public class Scheduler {
 
 		@Override
 		public void run() {
-			logger.info("Cron: scheduler started");
+			logger.info("araqne cron: scheduler started");
 			loop();
 		}
 
@@ -156,10 +157,10 @@ public class Scheduler {
 				try {
 					Thread.sleep(this.SLEEP_TIME * 1000); // sleep for 10 sec
 				} catch (InterruptedException e) {
-					logger.warn("Cron: scheduler Thread.sleep error.", e);
+					logger.debug("araqne cron: scheduler Thread.sleep interrupted.");
 				}
 			}
-			logger.info("Cron: scheduler stopped");
+			logger.info("araqne cron: scheduler stopped");
 		}
 
 		private void checkAndRun() {
