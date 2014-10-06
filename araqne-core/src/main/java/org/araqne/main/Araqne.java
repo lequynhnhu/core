@@ -77,7 +77,6 @@ import org.araqne.cron.impl.CronServiceImpl;
 import org.araqne.cron.impl.TickServiceImpl;
 import org.araqne.instrumentation.InstrumentationServiceImpl;
 import org.araqne.keystore.KeyStoreScriptFactory;
-import org.araqne.logger.AraqneFileAppender;
 import org.araqne.logger.AraqneLogService;
 import org.araqne.logger.LogCleaner;
 import org.araqne.logger.LoggerScriptFactory;
@@ -118,6 +117,8 @@ import sun.misc.SignalHandler;
 @SuppressWarnings("restriction")
 public class Araqne implements BundleActivator, SignalHandler {
 	private static BundleContext context = null;
+	private static Felix felix = null;
+
 	public static Instrumentation instrumentation = null;
 	private Logger logger = null;
 
@@ -126,11 +127,27 @@ public class Araqne implements BundleActivator, SignalHandler {
 	private PreferencesManager prefsManager;
 	private ConfigService conf;
 	private AuthService auth;
-	private CronService cron;
+	private CronServiceImpl cron;
 	private TickServiceImpl tick;
 	private BannerService banner;
 
+	// telnetd
+	private NioSocketAcceptor acceptor;
+
+	// sshd
+	private SshServer sshd;
+
 	private static boolean serviceMode = false;
+	private static boolean restart;
+
+	public static void reboot() {
+		restart = true;
+		try {
+			felix.stop();
+		} catch (BundleException e) {
+			e.printStackTrace();
+		}
+	}
 
 	// temporal access. remind cyclic dependency.
 	public static BundleContext getContext() {
@@ -149,7 +166,15 @@ public class Araqne implements BundleActivator, SignalHandler {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		startAraqne(new StartOptions(args));
+		do {
+			startAraqne(new StartOptions(args));
+			felix.waitForStop(0);
+
+			// ensure all system libraries unloaded
+			for (int i = 0; i < 5; i++)
+				System.gc();
+
+		} while (restart);
 	}
 
 	private static Araqne araqne;
@@ -206,6 +231,13 @@ public class Araqne implements BundleActivator, SignalHandler {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void boot(StartOptions startOptions) throws Exception {
+		// reboot case
+		// if (felix != null) {
+		// felix.init();
+		// felix.start();
+		// return;
+		// }
+
 		File jarPath = new File(URLDecoder.decode(Araqne.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
 				"utf-8"));
 		File dir = jarPath.getParentFile();
@@ -241,9 +273,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 		felix.start();
 	}
 
-	private Felix felix = null;
-
-	public Framework getFramework() {
+	public static Framework getFramework() {
 		return felix;
 	}
 
@@ -298,12 +328,17 @@ public class Araqne implements BundleActivator, SignalHandler {
 		int port = getConsolePortNumber();
 		InetSocketAddress bindSocketAddress = new InetSocketAddress(address, port);
 
-		NioSocketAcceptor acceptor = new NioSocketAcceptor();
+		acceptor = new NioSocketAcceptor();
 		acceptor.getFilterChain().addLast("protocol", new ProtocolCodecFilter(new TelnetCodecFactory()));
 		acceptor.setHandler(new TelnetHandler(context));
 		acceptor.setReuseAddress(true);
 		acceptor.bind(bindSocketAddress);
 		logger.info("Telnet " + bindSocketAddress + " opened.");
+	}
+
+	private void stopTelnetServer() {
+		acceptor.unbind();
+		acceptor.dispose();
 	}
 
 	/**
@@ -434,12 +469,15 @@ public class Araqne implements BundleActivator, SignalHandler {
 	 */
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		cron.invalidate();
+		tick.stop();
+
+		stopSshServer();
+		stopTelnetServer();
+
 		prefsManager.stop(context);
 
 		stopLogging();
-
-		if (!serviceMode)
-			System.exit(0);
 	}
 
 	/**
@@ -511,7 +549,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 			// ignore
 		}
 
-		SshServer sshd = SshServer.setUpDefaultServer();
+		sshd = SshServer.setUpDefaultServer();
 		sshd.setHost(sshAddress);
 		sshd.setPort(port);
 		sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("hostkey.pem"));
@@ -554,5 +592,12 @@ public class Araqne implements BundleActivator, SignalHandler {
 		sshd.setChannelFactories(namedChannelFactories);
 
 		sshd.start();
+	}
+
+	private void stopSshServer() {
+		try {
+			sshd.stop();
+		} catch (InterruptedException e) {
+		}
 	}
 }

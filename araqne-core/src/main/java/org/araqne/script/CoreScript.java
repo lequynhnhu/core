@@ -350,6 +350,10 @@ public class CoreScript implements Script {
 	public void guid(String[] args) {
 		context.println(UUID.randomUUID().toString());
 	}
+	
+	public void reboot(String[] args) {
+		Araqne.reboot();
+	}
 
 	public void shutdown(String[] args) {
 		if (Araqne.isServiceMode()) {
