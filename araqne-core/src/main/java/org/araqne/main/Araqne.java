@@ -209,10 +209,38 @@ public class Araqne implements BundleActivator, SignalHandler {
 		}
 
 		if ("start".equals(cmd)) {
-			serviceMode = true;
-			startAraqne(new StartOptions());
+			new ServiceRunner(args).start();
 		} else {
 			stopAraqne();
+		}
+	}
+
+	private static class ServiceRunner extends Thread {
+		private String[] args;
+
+		public ServiceRunner(String[] args) {
+			super("Windows Service Runner");
+			serviceMode = true;
+			this.args = args;
+		}
+
+		@Override
+		public void run() {
+			try {
+				do {
+					restart = false;
+					startAraqne(new StartOptions(args));
+					felix.waitForStop(0);
+
+					if (restart) {
+						// ensure all system libraries unloaded
+						for (int i = 0; i < 5; i++)
+							System.gc();
+					}
+				} while (restart);
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
 		}
 	}
 
@@ -521,7 +549,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 			// rootLogger.addAppender(new AraqneFileAppender(layout, logPath,
 			// ".yyyy-MM-dd"));
 		}
-		
+
 		logCleaner = new LogCleaner();
 		logCleaner.setDaemon(true);
 		logCleaner.start();

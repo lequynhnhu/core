@@ -297,8 +297,7 @@ public class CoreScript implements Script {
 	}
 
 	public static File canonicalize(File dir, String path) throws IOException {
-		if (File.separator.equals("\\") &&
-				(path.startsWith("\\") || (path.length() >= 3 && path.startsWith(":\\", 1))))
+		if (File.separator.equals("\\") && (path.startsWith("\\") || (path.length() >= 3 && path.startsWith(":\\", 1))))
 			return new File(path).getCanonicalFile();
 		else if (path.startsWith("/"))
 			return new File(path).getCanonicalFile();
@@ -350,19 +349,21 @@ public class CoreScript implements Script {
 	public void guid(String[] args) {
 		context.println(UUID.randomUUID().toString());
 	}
-	
+
 	public void reboot(String[] args) {
 		Araqne.reboot();
+		context.println("The system is going down for reboot!");
 	}
 
 	public void shutdown(String[] args) {
 		if (Araqne.isServiceMode()) {
-			context.println("You cannot use shutdown command when Araqne is running in service mode.");
+			context.println("You cannot use shutdown command when the system is running in service mode.");
 		} else {
 			try {
 				Araqne.getContext().getBundle(0).stop();
 			} catch (BundleException e) {
 			}
+			context.println("The system is going down for system halt!");
 		}
 	}
 

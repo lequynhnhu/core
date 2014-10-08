@@ -58,21 +58,25 @@ public class AraqneLoggerFactory implements ILoggerFactory, Runnable {
 
 	@Override
 	public void run() {
-		while (true) {
-			try {
-				AraqneLog log = queue.poll(100, TimeUnit.MILLISECONDS);
-				if (doStop)
+		try {
+			while (true) {
+				try {
+					AraqneLog log = queue.poll(100, TimeUnit.MILLISECONDS);
+					if (doStop)
+						break;
+
+					if (log == null)
+						continue;
+
+					for (BlockingQueue<AraqneLog> monitor : monitors.values()) {
+						monitor.add(log);
+					}
+				} catch (InterruptedException e) {
 					break;
-
-				if (log == null)
-					continue;
-
-				for (BlockingQueue<AraqneLog> monitor : monitors.values()) {
-					monitor.add(log);
 				}
-			} catch (InterruptedException e) {
-				break;
 			}
+		} finally {
+			doStop = false;
 		}
 	}
 
