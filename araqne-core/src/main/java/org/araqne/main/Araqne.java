@@ -166,17 +166,25 @@ public class Araqne implements BundleActivator, SignalHandler {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		do {
-			restart = false;
-			startAraqne(new StartOptions(args));
-			felix.waitForStop(0);
+		int returnCode = 0;
+		try {
+			do {
+				restart = false;
+				startAraqne(new StartOptions(args));
+				felix.waitForStop(0);
 
-			if (restart) {
-				// ensure all system libraries unloaded
-				for (int i = 0; i < 5; i++)
-					System.gc();
-			}
-		} while (restart);
+				if (restart) {
+					// ensure all system libraries unloaded
+					for (int i = 0; i < 5; i++)
+						System.gc();
+				}
+			} while (restart);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			returnCode = -1;
+		} finally {
+			System.exit(returnCode);
+		}
 	}
 
 	private static Araqne araqne;
@@ -226,6 +234,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 
 		@Override
 		public void run() {
+			int returnCode = 0;
 			try {
 				do {
 					restart = false;
@@ -240,6 +249,9 @@ public class Araqne implements BundleActivator, SignalHandler {
 				} while (restart);
 			} catch (Throwable t) {
 				t.printStackTrace();
+				returnCode = -1;
+			} finally {
+				System.exit(returnCode);
 			}
 		}
 	}
