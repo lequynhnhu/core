@@ -32,7 +32,7 @@ public class JSONConverter {
 			jsonWriter.object();
 
 			@SuppressWarnings("unchecked")
-			Map<String, Object> m = (HashMap<String, Object>) o;
+			Map<String, Object> m = (Map<String, Object>) o;
 
 			for (String key : m.keySet()) {
 				jsonWriter.key(key);
