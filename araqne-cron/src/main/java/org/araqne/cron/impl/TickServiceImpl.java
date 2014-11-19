@@ -91,11 +91,17 @@ public class TickServiceImpl implements TickService, Runnable {
 								break;
 
 							if (ev.scheduleTime <= now) {
-								eventMap.remove(ev.listener);
+								eventMap.remove(ev.timer);
 								queue.poll();
-								executor.execute(ev);
 
-								targets.add(ev.listener);
+								try {
+									executor.execute(ev);
+								} catch (OutOfMemoryError e) {
+									slog.error("araqne cron: cannot invoke tick timer [{}] interval [{}], error msg [{}]",
+											new Object[] { ev.timer, ev.timer.getInterval(), e.getMessage() });
+								}
+
+								targets.add(ev.timer);
 							} else {
 								break;
 							}
@@ -143,7 +149,7 @@ public class TickServiceImpl implements TickService, Runnable {
 	}
 
 	@Override
-	public List<TickTimer> getListeners() {
+	public List<TickTimer> getTimers() {
 		return new ArrayList<TickTimer>(listeners);
 	}
 
@@ -172,11 +178,11 @@ public class TickServiceImpl implements TickService, Runnable {
 
 	private class DelayedEvent implements Comparable<DelayedEvent>, Runnable {
 		private long scheduleTime;
-		private TickTimer listener;
+		private TickTimer timer;
 
-		public DelayedEvent(long scheduleTime, TickTimer listener) {
+		public DelayedEvent(long scheduleTime, TickTimer timer) {
 			this.scheduleTime = scheduleTime;
-			this.listener = listener;
+			this.timer = timer;
 		}
 
 		@Override
@@ -186,12 +192,12 @@ public class TickServiceImpl implements TickService, Runnable {
 
 		@Override
 		public void run() {
-			listener.onTick();
+			timer.onTick();
 		}
 
 		@Override
 		public String toString() {
-			return "tick " + scheduleTime + ", listener " + listener;
+			return "tick " + scheduleTime + ", timer " + timer;
 		}
 	}
 

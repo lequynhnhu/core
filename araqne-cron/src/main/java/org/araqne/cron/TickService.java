@@ -18,7 +18,7 @@ package org.araqne.cron;
 import java.util.List;
 
 public interface TickService {
-	List<TickTimer> getListeners();
+	List<TickTimer> getTimers();
 
 	void addTimer(TickTimer timer);
 

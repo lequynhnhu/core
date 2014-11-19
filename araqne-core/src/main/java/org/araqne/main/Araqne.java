@@ -74,6 +74,7 @@ import org.araqne.cron.CronService;
 import org.araqne.cron.TickService;
 import org.araqne.cron.impl.CronScriptFactory;
 import org.araqne.cron.impl.CronServiceImpl;
+import org.araqne.cron.impl.TickScriptFactory;
 import org.araqne.cron.impl.TickServiceImpl;
 import org.araqne.instrumentation.InstrumentationServiceImpl;
 import org.araqne.keystore.KeyStoreScriptFactory;
@@ -465,6 +466,7 @@ public class Araqne implements BundleActivator, SignalHandler {
 		registerScriptFactory(SunPerfScriptFactory.class, "sunperf");
 		registerScriptFactory(new AuthScriptFactory(auth), "auth");
 		registerScriptFactory(new CronScriptFactory(context, cron), "cron");
+		registerScriptFactory(new TickScriptFactory(tick), "tick");
 		registerScriptFactory(BatchScriptFactory.class, "batch");
 	}
 
