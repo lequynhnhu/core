@@ -45,7 +45,9 @@ public class FileConfigTransaction implements ConfigTransaction {
 	private Map<File, RevLogWriter> writers;
 	private ConfigTransactionCache cache;
 
-	public FileConfigTransaction(FileConfigDatabase db) {
+	public FileConfigTransaction(FileConfigDatabase db, int timeout) {
+		db.lock(timeout);
+
 		this.db = db;
 		this.cache = new FileConfigTransactionCache();
 		File dbDir = db.getDbDirectory();
@@ -62,6 +64,16 @@ public class FileConfigTransaction implements ConfigTransaction {
 		writers = new HashMap<File, RevLogWriter>();
 	}
 
+	@Deprecated
+	@Override
+	public void begin() {
+	}
+
+	@Deprecated
+	@Override
+	public void begin(int timeout) {
+	}
+
 	public Map<File, RevLogWriter> getWriters() {
 		return writers;
 	}
@@ -74,16 +86,6 @@ public class FileConfigTransaction implements ConfigTransaction {
 	@Override
 	public ConfigDatabase getDatabase() {
 		return db;
-	}
-
-	@Override
-	public void begin() {
-		db.lock();
-	}
-
-	@Override
-	public void begin(int timeout) {
-		db.lock(timeout);
 	}
 
 	/**

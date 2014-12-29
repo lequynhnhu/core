@@ -20,8 +20,10 @@ public interface ConfigTransaction {
 
 	ConfigDatabase getDatabase();
 
+	@Deprecated
 	void begin();
 
+	@Deprecated
 	void begin(int timeout);
 
 	void log(CommitOp operation, String colName, int docId, long rev, int index);

@@ -145,6 +145,8 @@ public class FileConfigDatabase implements ConfigDatabase {
 		lock(defaultTimeout);
 	}
 
+	// should be released by unlock()
+	@SuppressWarnings("resource")
 	public void lock(int timeout) {
 		// thread lock
 		threadLock.lock();
@@ -536,9 +538,7 @@ public class FileConfigDatabase implements ConfigDatabase {
 
 	@Override
 	public ConfigTransaction beginTransaction(int timeout) {
-		FileConfigTransaction xact = new FileConfigTransaction(this);
-		xact.begin(timeout);
-		return xact;
+		return new FileConfigTransaction(this, timeout);
 	}
 
 	@Override
