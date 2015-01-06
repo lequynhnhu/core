@@ -109,21 +109,31 @@ public class ThreadScript implements Script {
 		Collections.sort(threads, new ThreadOrder());
 
 		for (Thread t : threads) {
-			if (args.length > 0) {
-				String substr = args[0].toLowerCase();
-				if (!(t.getName().toLowerCase().contains(substr)
-						|| t.getThreadGroup().getName().toLowerCase().contains(substr)
-						|| t.getState().toString().toLowerCase().contains(substr) || Long.toString(t.getId()).contains(substr))) {
-					continue;
+			if (!t.isAlive())
+				continue;
+
+			try {
+				if (args.length > 0) {
+					String substr = args[0].toLowerCase();
+					if (!(t.getName().toLowerCase().contains(substr)
+							|| t.getThreadGroup().getName().toLowerCase().contains(substr)
+							|| t.getState().toString().toLowerCase().contains(substr) || Long.toString(t.getId()).contains(
+							substr))) {
+						continue;
+					}
 				}
+
+				String groupName = "N/A";
+				if (t.getThreadGroup() != null)
+					groupName = t.getThreadGroup().getName();
+
+				context.printf("[%3d] %s, Group: %s, State: %s, Priority: %d\n", t.getId(), t.getName(),
+						groupName, t.getState(), t.getPriority());
+			} catch (NullPointerException e) {
+				if (t.getName() != null) {
+					throw e;
+				} // else ignore
 			}
-			
-			String groupName = "N/A";
-			if (t.getThreadGroup() != null)
-				groupName = t.getThreadGroup().getName();
-			
-			context.printf("[%3d] %s, Group: %s, State: %s, Priority: %d\n", t.getId(), t.getName(),
-					groupName, t.getState(), t.getPriority());
 		}
 	}
 
