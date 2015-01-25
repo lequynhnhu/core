@@ -15,10 +15,13 @@
  */
 package org.araqne.confdb.file;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.araqne.codec.OutputStreamHelper;
 import org.araqne.codec.CustomCodec;
 import org.araqne.codec.UnsupportedTypeException;
 import org.araqne.confdb.CollectionEntry;
@@ -26,6 +29,44 @@ import org.araqne.confdb.ConfigEntry;
 
 public class FileManifestCodec implements CustomCodec {
 
+	@Override
+	public void write(OutputStream os, Object value) throws IOException {
+		if (!(value instanceof FileManifest))
+			throw new UnsupportedTypeException(value.toString());
+
+		FileManifest manifest = (FileManifest) value;
+
+		// type byte
+		os.write((byte) 200);
+		
+		// version 2
+		os.write((byte) 2);
+		
+		// collection count
+		OutputStreamHelper h = new OutputStreamHelper(os);
+		h.writeShort((short) manifest.getCollectionNames().size());
+
+		try {
+			for (String colName : manifest.getCollectionNames()) {
+				CollectionEntry colEntry = manifest.getCollectionEntry(colName);
+				byte[] nameBytes = colName.getBytes("utf-8");
+				h.writeShort((short) colEntry.getId());
+				h.writeShort((short) nameBytes.length);
+				os.write(nameBytes);
+
+				List<ConfigEntry> configs = manifest.getConfigEntries(colName);
+				h.writeShort((short) configs.size());
+
+				for (ConfigEntry config : configs) {
+					h.writeInt(config.getDocId());
+					h.writeLong(config.getRev());
+					h.writeInt(config.getIndex());
+				}
+			}
+		} catch (UnsupportedEncodingException e) {
+		}
+	}
+	
 	@Override
 	public void encode(ByteBuffer bb, Object value) {
 		if (!(value instanceof FileManifest))

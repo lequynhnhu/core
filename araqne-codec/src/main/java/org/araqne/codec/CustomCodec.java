@@ -15,9 +15,17 @@
  */
 package org.araqne.codec;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 public interface CustomCodec {
+	/**
+	 * @throws IOException 
+	 * @since 2.4.0
+	 */
+	void write(OutputStream os, Object value) throws IOException;
+	
 	void encode(ByteBuffer bb, Object value);
 
 	int lengthOf(Object value);

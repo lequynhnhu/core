@@ -154,7 +154,7 @@ class ChangeLog implements CommitLog {
 	 */
 	public static int getManifest(byte[] b) {
 		ByteBuffer bb = ByteBuffer.wrap(b);
-		bb.get(); // type (9)
+		int mapType = bb.get(); // type MAP(9) or MAP2(17)
 		EncodingRule.decodeRawNumber(bb); // skip map length part
 
 		// enumerate keys of map
@@ -166,7 +166,7 @@ class ChangeLog implements CommitLog {
 			} else {
 				// parse map value
 				byte type = bb.get();
-				switch(type) {
+				switch (type) {
 				case EncodingRule.NULL_TYPE:
 					break;
 				case EncodingRule.BOOLEAN_TYPE:
@@ -205,13 +205,20 @@ class ChangeLog implements CommitLog {
 				case EncodingRule.DOUBLE_TYPE:
 					bb.position((int) (bb.position() + 8));
 					break;
-					
+
 				case EncodingRule.BLOB_TYPE:
 				case EncodingRule.MAP_TYPE:
 				case EncodingRule.STRING_TYPE:
 				case EncodingRule.ARRAY_TYPE:
 					long l = EncodingRule.decodeRawNumber(bb);
 					bb.position((int) (bb.position() + l));
+					break;
+				case EncodingRule.MAP2_TYPE:
+				case EncodingRule.ARRAY2_TYPE:
+					long count = EncodingRule.decodeRawNumber(bb);
+					for (int i = 0; i < count; i++) {
+						EncodingRule.decode(bb);
+					}
 					break;
 				default:
 					throw new IllegalStateException("unexpected type: " + type);
@@ -277,7 +284,7 @@ class ChangeLog implements CommitLog {
 		if (created != null)
 			createdDate += dateFormat.format(created);
 
-		return "rev=" + rev + createdDate + ", committer=" + committer + ", msg=" + message + ", changeset=["
-				+ sb.toString() + "]";
+		return "rev=" + rev + createdDate + ", committer=" + committer + ", msg=" + message + ", changeset=[" + sb.toString()
+				+ "]";
 	}
 }
