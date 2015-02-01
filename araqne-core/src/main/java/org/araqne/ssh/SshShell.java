@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SshShell implements Command, Runnable, QuitHandler {
+	private static final String ESCAPE_CHAR = Character.toString((char) 27);
 	private final Logger logger = LoggerFactory.getLogger(SshShell.class.getName());
 	private ShellSession session;
 	private InputStream in;
@@ -55,13 +56,15 @@ public class SshShell implements Command, Runnable, QuitHandler {
 	private String username;
 	private boolean closed = false;
 
+	private MessageReceiver out;
 	private IoSession ioSession;
 
 	public SshShell(IoSession ioSession) {
 		this.ioSession = ioSession;
 		this.context = new ScriptContextImpl(Araqne.getContext(), this);
 		this.session = new ShellSession(context);
-		this.tsm = new TelnetStateMachine(new MessageReceiver(session), context);
+		this.out = new MessageReceiver(session);
+		this.tsm = new TelnetStateMachine(out, context);
 	}
 
 	@Override
@@ -135,6 +138,9 @@ public class SshShell implements Command, Runnable, QuitHandler {
 			if (!(e instanceof InterruptedIOException))
 				e.printStackTrace();
 		} finally {
+			// break any read() or readLine()
+			out.write(ESCAPE_CHAR);
+
 			callback.onExit(0);
 			SocketAddress remoteAddr = null;
 			if (ioSession != null)
