@@ -101,14 +101,16 @@ public class ScriptRunner implements Runnable {
 
 	}
 
-	private Logger logger = LoggerFactory.getLogger(ScriptRunner.class.getName());
+	private Logger slog = LoggerFactory.getLogger(ScriptRunner.class.getName());
 	private ScriptContext context;
 	private String methodName;
 	private String[] args;
 	private boolean isPromptEnabled = true;
 	private String inputStreamString;
+	private String line;
 
 	public ScriptRunner(ScriptContext context, String line) {
+		this.line = line;
 		String[] tokens = ScriptArgumentParser.tokenize(line.trim());
 		String[] commandTokens = tokens[0].split("\\.");
 		String alias = null;
@@ -181,6 +183,12 @@ public class ScriptRunner implements Runnable {
 
 	@Override
 	public void run() {
+		String user = null;
+		if (context.getSession() != null)
+			user = (String) context.getSession().getProperty("araqne.user");
+
+		slog.info("araqne core: user [{}] execute command [{}]", user, line.trim());
+
 		context.turnEchoOn();
 		context.getInputStream().flush();
 
@@ -237,16 +245,16 @@ public class ScriptRunner implements Runnable {
 			}
 		} catch (SecurityException e) {
 			context.println(e.toString());
-			logger.warn("script runner: ", e);
+			slog.warn("script runner: ", e);
 		} catch (NoSuchMethodException e) {
 			context.println("syntax error.");
-			logger.warn("script runner: {}.{} not found", script.getClass().getName(), methodName);
+			slog.warn("script runner: {}.{} not found", script.getClass().getName(), methodName);
 		} catch (IllegalAccessException e) {
 			context.println("syntax error.");
-			logger.warn("script runner: {}.{} forbidden", script.getClass().getName(), methodName);
+			slog.warn("script runner: {}.{} forbidden", script.getClass().getName(), methodName);
 		} catch (InvocationTargetException e) {
 			context.println(e.getTargetException().toString());
-			logger.warn("script runner: ", e);
+			slog.warn("script runner: ", e);
 		}
 	}
 
