@@ -199,7 +199,7 @@ public class CoreScript implements Script {
 			FileChannel outChannel = new FileOutputStream(to).getChannel();
 
 			try {
-				inChannel.transferTo(0, inChannel.size(), outChannel);
+				ensureTransferTo(inChannel, outChannel, inChannel.size());
 			} catch (IOException e) {
 				context.println(e.getMessage());
 			} finally {
@@ -208,6 +208,14 @@ public class CoreScript implements Script {
 			}
 		}
 	}
+	
+	private void ensureTransferTo(FileChannel srcChannel, FileChannel dstChannel, long length) throws IOException {
+		long copied = 0;
+		while (copied < length) {
+			copied += srcChannel.transferTo(copied, length - copied, dstChannel);
+		}
+	}
+
 
 	@ScriptUsage(description = "delete file", arguments = { @ScriptArgument(name = "file path", type = "string", description = "file path", autocompletion = PathAutoCompleter.class) })
 	public void rm(String[] args) throws IOException {
