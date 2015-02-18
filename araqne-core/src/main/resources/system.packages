@@ -1,4 +1,5 @@
 org.osgi.framework; version=1.7.0,
+org.osgi.framework.wiring ; version=1.7.0,
 org.osgi.service.cm;version=1.7.0,
 org.osgi.service.packageadmin; version=1.7.0,
 org.osgi.service.startlevel; version=1.7.0,
