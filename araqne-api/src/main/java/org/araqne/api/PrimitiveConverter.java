@@ -254,9 +254,13 @@ public class PrimitiveConverter {
 
 					CollectionTypeHint hint = f.getAnnotation(CollectionTypeHint.class);
 					if (value instanceof List) {
-						if (hint != null)
-							f.set(n, parseCollection(hint.value(), (List) value));
-						else
+						if (hint != null) {
+							if (Set.class.isAssignableFrom(fieldType)) {
+								f.set(n, parseSet(hint.value(), (List) value));
+							} else {
+								f.set(n, parseCollection(hint.value(), (List) value));
+							}
+						} else
 							f.set(n, value);
 					}
 				} else if (Map.class.isAssignableFrom(fieldType)) {
@@ -290,6 +294,22 @@ public class PrimitiveConverter {
 			m.put(key, src.get(key));
 		}
 		return m;
+	}
+
+	public static <T> Collection<T> parseSet(Class<T> cls, Collection<Object> coll) {
+		return parseSet(cls, coll, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> Collection<T> parseSet(Class<T> cls, Collection<Object> coll, PrimitiveParseCallback callback) {
+		Collection<T> result = new HashSet<T>();
+		for (Object obj : coll) {
+			if (Map.class.isAssignableFrom(obj.getClass()))
+				result.add(parse(cls, obj, callback));
+			else
+				result.add((T) obj);
+		}
+		return result;
 	}
 
 	public static <T> Collection<T> parseCollection(Class<T> cls, Collection<Object> coll) {
