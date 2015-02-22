@@ -119,8 +119,14 @@ public class PackageManagerService implements PackageManager {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	public void installPackage(String packageName, String version, ProgressMonitor monitor)
+			throws AlreadyInstalledPackageException, PackageNotFoundException, MavenResolveException, KeyStoreException,
+			UnrecoverableKeyException, KeyManagementException {
+		installPackage(packageName, version, monitor, true);
+	}
+
+	public void installPackage(String packageName, String version, ProgressMonitor monitor, boolean startBundles)
 			throws AlreadyInstalledPackageException, PackageNotFoundException, MavenResolveException, KeyStoreException,
 			UnrecoverableKeyException, KeyManagementException {
 		PackageDescriptor pkg = db.findInstalledPackage(packageName);
@@ -147,8 +153,9 @@ public class PackageManagerService implements PackageManager {
 			// force bundle refresh
 			bundleManager.refresh();
 
-			// start bundles
-			startBundles(newPkg, monitor);
+			if (startBundles)
+				// start bundles
+				startBundles(newPkg, monitor);
 
 			db.installPackage(newPkg);
 		} catch (BundleException e) {
