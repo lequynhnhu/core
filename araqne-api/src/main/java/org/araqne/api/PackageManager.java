@@ -68,4 +68,8 @@ public interface PackageManager {
 	List<PackageIndex> getPackageIndexes();
 
 	PackageIndex getPackageIndex(PackageRepository repo);
+	
+	void installPackage(String packageName, String version, ProgressMonitor monitor, boolean startBundles) throws AlreadyInstalledPackageException,
+		PackageNotFoundException, MavenResolveException, KeyStoreException, UnrecoverableKeyException, KeyManagementException;
+
 }

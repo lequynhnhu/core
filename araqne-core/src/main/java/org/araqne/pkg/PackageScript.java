@@ -204,16 +204,21 @@ public class PackageScript implements Script {
 
 	@ScriptUsage(description = "install new package", arguments = {
 			@ScriptArgument(name = "package name", type = "string", description = "the name of araqne package"),
-			@ScriptArgument(name = "version", type = "string", description = "the version of araqne package", optional = true) })
+			@ScriptArgument(name = "version", type = "string", description = "the version of araqne package", optional = true),
+			@ScriptArgument(name = "startBundles", type = "boolean", description = "start bundles after installation", optional = true)})
 	public void install(String[] args) {
 		String packageName = args[0];
 		String version = null;
+		boolean startBundles = true;
 
 		if (args.length > 1)
 			version = args[1];
+		
+		if (args.length > 2)
+			startBundles = Boolean.parseBoolean(args[2]);
 
 		try {
-			packageManager.installPackage(packageName, version, new ProgressMonitorImpl(context));
+			packageManager.installPackage(packageName, version, new ProgressMonitorImpl(context), startBundles);
 			context.println("");
 			context.println("Complete!");
 		} catch (AlreadyInstalledPackageException e) {
