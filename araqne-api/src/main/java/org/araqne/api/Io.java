@@ -15,6 +15,7 @@
  */
 package org.araqne.api;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -74,5 +75,14 @@ public class Io {
 		}
 
 		return total;
+	}
+
+	public static void ensureClose(Closeable c) {
+		if (c != null) {
+			try {
+				c.close();
+			} catch (IOException e) {
+			}
+		}
 	}
 }
