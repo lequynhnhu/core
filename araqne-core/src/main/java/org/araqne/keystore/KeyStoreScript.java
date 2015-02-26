@@ -115,17 +115,15 @@ public class KeyStoreScript implements Script {
 	@ScriptUsage(description = "register keystore", arguments = {
 			@ScriptArgument(name = "name", description = "the name of the key store"),
 			@ScriptArgument(name = "type", description = "the type of the key store. for example, JKS, PKCS12, etc."),
-			@ScriptArgument(name = "file path", description = "the file path of the key store", autocompletion = PathAutoCompleter.class),
-			@ScriptArgument(name = "password", description = "the password of the key store", optional = true) })
+			@ScriptArgument(name = "file path", description = "the file path of the key store", autocompletion = PathAutoCompleter.class)})
 	public void register(String[] args) {
-		String alias = args[0];
-		String type = args[1];
-		String path = args[2];
-		char[] password = null;
-		if (args.length >= 4)
-			password = args[3].toCharArray();
-
 		try {
+			String alias = args[0];
+			String type = args[1];
+			String path = args[2];
+			context.print("Key-Store Password? ");
+			char[] password = context.readPassword().toCharArray();
+			
 			manager.registerKeyStore(alias, type, path, password);
 			context.printf("[%s] key store registered\n", alias);
 		} catch (KeyStoreException e) {
@@ -143,6 +141,8 @@ public class KeyStoreScript implements Script {
 		} catch (IOException e) {
 			context.printf("io exception: %s\n", e.getMessage());
 			logger.warn("keystore.register: ", e);
+		} catch (InterruptedException e) {
+			context.println("interrupted");
 		}
 	}
 

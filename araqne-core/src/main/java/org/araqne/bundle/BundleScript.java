@@ -182,21 +182,26 @@ public class BundleScript implements Script {
 
 	@ScriptUsage(description = "Set credential for repository http authentication", arguments = {
 			@ScriptArgument(name = "alias", type = "string", description = "alias of the maven repository"),
-			@ScriptArgument(name = "account", type = "string", description = "account for http authentication"),
-			@ScriptArgument(name = "password", type = "string", description = "password for http authentication") })
+			@ScriptArgument(name = "account", type = "string", description = "account for http authentication")})
 	public void setHttpAuth(String[] args) {
-		BundleRepository repo = manager.getRepository(args[0]);
-		if (repo == null) {
-			context.println("repository not found");
-			return;
+		try {
+			BundleRepository repo = manager.getRepository(args[0]);
+			if (repo == null) {
+				context.println("repository not found");
+				return;
+			}
+			context.print("Password? ");
+			String password = context.readPassword();
+
+			repo.setAccount(args[1]);
+			repo.setPassword(password);
+			repo.setAuthRequired(true);
+
+			manager.updateRepository(repo);
+			context.println("ok");
+		} catch (InterruptedException e) {
+			context.println("interrupted");
 		}
-
-		repo.setAccount(args[1]);
-		repo.setPassword(args[2]);
-		repo.setAuthRequired(true);
-
-		manager.updateRepository(repo);
-		context.println("ok");
 	}
 
 	@ScriptUsage(description = "Reset credential for repository http authentication", arguments = { @ScriptArgument(name = "alias", type = "string", description = "alias of the maven repository") })
