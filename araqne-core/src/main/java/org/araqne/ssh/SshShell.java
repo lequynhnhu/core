@@ -102,7 +102,8 @@ public class SshShell implements Command, Runnable, QuitHandler {
 		env.addSignalListener(new SignalListener() {
 			@Override
 			public void signal(Signal signal) {
-				logger.info(signal.toString());
+				if (logger.isDebugEnabled())
+					logger.debug("araqne core: singal {} from [{}]", signal.toString(), ioSession.getRemoteAddress().toString());
 			}
 		});
 
@@ -110,6 +111,7 @@ public class SshShell implements Command, Runnable, QuitHandler {
 
 		username = env.getEnv().get(Environment.ENV_USER);
 		session.setPrincipal(username);
+		session.getScriptContext().getSession().setProperty("araqne.user", username);
 		context.getController().setAutoCompletion(true);
 
 		thread = new Thread(this, "SshShell");
