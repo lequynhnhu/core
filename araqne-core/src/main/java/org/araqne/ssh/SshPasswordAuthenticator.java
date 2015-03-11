@@ -51,7 +51,7 @@ public class SshPasswordAuthenticator implements PasswordAuthenticator {
 		if (matched)
 			slog.info("araqne core: ssh user [{}] login from [{}]", username, remoteAddr);
 		else
-			slog.error("araqne core: ssh login failed for user [{]] from [{}]", username, remoteAddr);
+			slog.error("araqne core: ssh login failed for user [{}] from [{}]", username, remoteAddr);
 
 		return matched;
 	}
