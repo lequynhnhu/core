@@ -280,13 +280,17 @@ public class ScriptRunner implements Runnable {
 	public static void main(String[] args) {
 		String input = "Line1\nline2\nline3\n\nline5\n";
 		StringReader reader = new StringReader(input);
-		Scanner scanner = new Scanner(reader);
+		Scanner scanner = null;
 
 		try {
+			scanner = new Scanner(reader);
 			System.out.println(new String(new int[] { reader.read() }, 0, 1));
 			System.out.println(scanner.nextLine());
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			if (scanner != null)
+				scanner.close();
 		}
 	}
 }

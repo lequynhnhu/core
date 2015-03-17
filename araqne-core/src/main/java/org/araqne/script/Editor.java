@@ -334,9 +334,10 @@ public class Editor {
 	private List<String> readFile(File f) {
 		List<String> lines = new LinkedList<String>();
 		FileInputStream is = null;
+		BufferedReader br = null;
 		try {
 			is = new FileInputStream(f);
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			br = new BufferedReader(new InputStreamReader(is));
 
 			while (true) {
 				String line = br.readLine();
@@ -347,9 +348,9 @@ public class Editor {
 			}
 		} catch (IOException e) {
 		} finally {
-			if (is != null)
+			if (br != null)
 				try {
-					is.close();
+					br.close();
 				} catch (IOException e) {
 				}
 		}

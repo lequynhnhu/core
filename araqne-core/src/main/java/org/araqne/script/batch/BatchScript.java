@@ -67,8 +67,9 @@ public class BatchScript implements Script {
 			return;
 		}
 
+		BufferedReader br = null;
 		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 			while (true) {
 				String line = br.readLine();
 				if (line == null)
@@ -80,6 +81,12 @@ public class BatchScript implements Script {
 			context.println("file not found: " + file.getAbsolutePath());
 		} catch (IOException e) {
 			context.printf("io exception: %s\n", e.toString());
+		} finally {
+			if (br != null)
+				try {
+					br.close();
+				} catch (IOException e) {
+				}
 		}
 
 	}

@@ -195,16 +195,23 @@ public class CoreScript implements Script {
 		else if (to == null)
 			context.println("cp: cannot stat '" + args[1] + "': No such file or directory");
 		else {
-			FileChannel inChannel = new FileInputStream(from).getChannel();
-			FileChannel outChannel = new FileOutputStream(to).getChannel();
-
+			FileInputStream in = null;
+			FileOutputStream out = null;
+			FileChannel inChannel = null;
+			FileChannel outChannel = null;
 			try {
+				in = new FileInputStream(from);
+				out = new FileOutputStream(to);
+				inChannel = in.getChannel();
+				outChannel = out.getChannel();
 				ensureTransferTo(inChannel, outChannel, inChannel.size());
 			} catch (IOException e) {
 				context.println(e.getMessage());
 			} finally {
 				inChannel.close();
 				outChannel.close();
+				in.close();
+				out.close();
 			}
 		}
 	}

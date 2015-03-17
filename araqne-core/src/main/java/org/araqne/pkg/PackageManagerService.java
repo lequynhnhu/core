@@ -624,16 +624,20 @@ public class PackageManagerService implements PackageManager {
 	private byte[] download(PackageRepository repo, URL url) throws IOException, KeyStoreException, UnrecoverableKeyException,
 			KeyManagementException {
 		if (repo.isLocalFilesystem()) {
+			FileInputStream stream = null;
 			try {
 				File file = new File(url.toURI());
 				long length = file.length();
-				FileInputStream stream = new FileInputStream(file);
+				stream = new FileInputStream(file);
 				byte[] b = new byte[(int) length];
 				stream.read(b);
 				return b;
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 				return new byte[0];
+			} finally {
+				if (stream != null)
+					stream.close();
 			}
 		} else if (repo.isHttps()) {
 			ServiceReference<?> ref = bc.getServiceReference(KeyStoreManager.class.getName());
@@ -657,16 +661,20 @@ public class PackageManagerService implements PackageManager {
 	private String downloadString(PackageRepository repo, URL url) throws IOException, KeyStoreException,
 			UnrecoverableKeyException, KeyManagementException {
 		if (repo.isLocalFilesystem()) {
+			FileInputStream stream = null;
 			try {
 				File file = new File(url.toURI());
 				long length = file.length();
-				FileInputStream stream = new FileInputStream(file);
+				stream = new FileInputStream(file);
 				byte[] b = new byte[(int) length];
 				stream.read(b);
 				return new String(b, Charset.forName("UTF-8"));
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 				return new String();
+			} finally {
+				if (stream != null)
+					stream.close();
 			}
 		} else if (repo.isHttps()) {
 			ServiceReference<?> ref = bc.getServiceReference(KeyStoreManager.class.getName());

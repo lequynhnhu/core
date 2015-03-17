@@ -132,16 +132,19 @@ public class MavenMetadata {
 		} else if (repository.isAuthRequired()) // http auth
 			return new String(HttpWagon.download(url, true, repository.getAccount(), repository.getPassword()));
 		else if (url.getProtocol().equals("file")) {
+			FileInputStream stream = null;
 			try {
 				File file = new File(url.toURI());
 				long length = file.length();
-				FileInputStream stream = new FileInputStream(file);
+				stream = new FileInputStream(file);
 				byte[] b = new byte[(int) length];
 				stream.read(b);
 				return new String(b);
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 				return "";
+			} finally {
+				stream.close();
 			}
 		} else
 			// plain http

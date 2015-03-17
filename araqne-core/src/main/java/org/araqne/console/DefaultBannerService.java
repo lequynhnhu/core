@@ -27,14 +27,18 @@ public class DefaultBannerService implements BannerService {
 	private String banner = "Araqne Core";
 
 	public DefaultBannerService() throws IOException {
+		JarFile jar = null;
 		try {
 			String jarFileName = System.getProperty("java.class.path").split(System.getProperty("path.separator"))[0];
-			JarFile jar = new JarFile(jarFileName);
+			jar = new JarFile(jarFileName);
 			Manifest mf = jar.getManifest();
 			Attributes attrs = mf.getMainAttributes();
 			banner = "Araqne Core " + attrs.getValue("Araqne-Version");
 		} catch (FileNotFoundException e) {
 			banner = "Araqne Core (Debug mode)";
+		} finally {
+			if (jar != null)
+				jar.close();
 		}
 	}
 
